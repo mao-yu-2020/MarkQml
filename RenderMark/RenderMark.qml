@@ -1,4 +1,7 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
+import QtQuick.Controls
 import RenderMark
 
 /**
@@ -56,24 +59,27 @@ Flickable {
         Repeater {
             model: root.tree && root.tree.root ? tree.root.children : []
 
-            // delegate: Loader {
-            //     width: parent.width
-            //     onLoaded: {
-            //         item.astNode = modelData
-            //         item.style = root.markStyle
-            //     }
-            // }
+            delegate:  Loader {
+                required property var modelData
+                property var nodeStyle: root.markStyle
+
+                sourceComponent: {
+
+                }
+            }
         }
     }
 
     // 样式对象，统一传递给所有子组件
     property var markStyle: ({
-        textColor: textColor,
-        linkColor: linkColor,
-        codeBackground: codeBackground,
-        blockQuoteBorder: blockQuoteBorder,
-        tableBorder: tableBorder,
-        tableHeaderBg: tableHeaderBg,
-        baseFontSize: baseFontSize
-    })
+                     textColor: textColor,
+                     linkColor: linkColor,
+                     codeBackground: codeBackground,
+                     blockQuoteBorder: blockQuoteBorder,
+                     tableBorder: tableBorder,
+                     tableHeaderBg: tableHeaderBg,
+                     baseFontSize: baseFontSize
+                 })
+
+
 }
