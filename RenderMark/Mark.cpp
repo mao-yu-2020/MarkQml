@@ -2,6 +2,9 @@
 #include "MarkTree.h"
 #include "MarkNode.h"
 
+#include <QFile>
+#include <QTextStream>
+
 #include <cmark-gfm.h>
 #include <cmark-gfm-core-extensions.h>
 
@@ -223,6 +226,22 @@ MarkTree *Mark::parse(const QString &markdown) const
 
     cmark_parser_free(parser);
     return tree;
+}
+
+MarkTree *Mark::parseFile(const QString &filePath) const
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Failed to open file:" << filePath;
+        return new MarkTree();
+    }
+
+    QTextStream in(&file);
+    in.setEncoding(QStringConverter::Utf8);
+    const QString content = in.readAll();
+    file.close();
+
+    return parse(content);
 }
 
 void Mark::begin()

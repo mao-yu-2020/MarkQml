@@ -41,6 +41,13 @@ public:
     Q_INVOKABLE MarkTree *parse(const QString &markdown) const;
 
     /**
+     * @brief 从本地文件路径读取 Markdown 并解析为 AST
+     * @param filePath 文件路径（支持绝对路径和相对路径）
+     * @return AST 树；若文件打开失败则返回空树
+     */
+    Q_INVOKABLE MarkTree *parseFile(const QString &filePath) const;
+
+    /**
      * @brief 开始一次增量式解析会话
      *
      * 调用后会创建一个新的 cmark 解析器，后续可通过 feed() 分批追加文本。

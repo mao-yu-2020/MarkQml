@@ -57,6 +57,17 @@ Window {
                 onClicked: fileDialog.open()
             }
 
+            Button {
+                text: "🌲 打印节点树"
+                onClicked: {
+                    if (renderMark.tree) {
+                        console.log(renderMark.tree.printTree())
+                    } else {
+                        console.log("节点树为空")
+                    }
+                }
+            }
+
             Label {
                 text: "MarkQml 渲染测试"
                 font.pixelSize: 18
@@ -101,25 +112,9 @@ Window {
         nameFilters: ["Markdown files (*.md)", "All files (*)"]
 
         onAccepted: {
-            mainWindow.readFile(fileDialog.currentFile, function(content) {
-                mainWindow.markdownText = content
-            })
+            var localPath = decodeURIComponent(fileDialog.currentFile.toString().replace("file:///", ""))
+            renderMark.markdown = ""
+            renderMark.tree = _mark.parseFile(localPath)
         }
-    }
-
-    // 使用 XMLHttpRequest 读取本地文件内容
-    function readFile(url, callback) {
-        var xhr = new XMLHttpRequest()
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 0 || xhr.status === 200) {
-                    callback(xhr.responseText)
-                } else {
-                    console.error("读取文件失败:", url, "状态:", xhr.status, xhr.statusText)
-                }
-            }
-        }
-        xhr.open("GET", url)
-        xhr.send()
     }
 }
