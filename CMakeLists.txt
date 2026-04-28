@@ -8,6 +8,8 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
+add_subdirectory(RenderMark)
+
 qt_add_executable(appMarkQml
     main.cpp
 )
@@ -30,7 +32,9 @@ set_target_properties(appMarkQml PROPERTIES
 )
 
 target_link_libraries(appMarkQml
-    PRIVATE Qt6::Quick
+    PRIVATE
+        Qt6::Quick
+        RenderMark
 )
 
 include(GNUInstallDirs)
