@@ -7,20 +7,25 @@ import QtQuick
  * 若位于 heading 内，根据 headingLevel 调整字体大小。
  */
 Text {
+    id: control
     property var node: null
     property var style: null
     property int headingLevel: 0
 
-    text: node ? node.content : ""
-    color: hasLinkAncestor() ? (style ? style.linkColor : "#0066cc") : (style ? style.textColor : "black")
+    text: control.node ? control.node.content : ""
+    color: hasLinkAncestor()
+           ? (control.style ? control.style.linkColor : "#0066cc")
+           : (control.style ? control.style.textColor : "black")
     font.bold: hasStrongAncestor()
     font.italic: hasEmphasisAncestor()
     font.underline: hasLinkAncestor()
-    font.pixelSize: headingLevel > 0 ? headingPixelSize(headingLevel) : (style ? style.baseFontSize : 14)
+    font.pixelSize: control.headingLevel > 0
+                    ? headingPixelSize(control.headingLevel)
+                    : (control.style ? control.style.baseFontSize : 14)
     wrapMode: Text.Wrap
 
     function hasStrongAncestor() {
-        var n = node
+        var n = control.node
         while (n) {
             if (n.isStrong()) return true
             n = n.parentNode
@@ -29,7 +34,7 @@ Text {
     }
 
     function hasEmphasisAncestor() {
-        var n = node
+        var n = control.node
         while (n) {
             if (n.isEmphasis()) return true
             n = n.parentNode
@@ -38,7 +43,7 @@ Text {
     }
 
     function hasLinkAncestor() {
-        var n = node
+        var n = control.node
         while (n) {
             if (n.isLink()) return true
             n = n.parentNode
@@ -48,6 +53,6 @@ Text {
 
     function headingPixelSize(level) {
         var sizes = [0, 32, 28, 24, 20, 18, 16]
-        return sizes[level] || (style ? style.baseFontSize : 14)
+        return sizes[level] || (control.style ? control.style.baseFontSize : 14)
     }
 }

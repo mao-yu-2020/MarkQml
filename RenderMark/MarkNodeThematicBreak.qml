@@ -6,10 +6,11 @@ import QtQuick
  * 一条水平分隔线。
  */
 Rectangle {
+    id: control
     property var node: null
     property var style: null
 
     width: parent.width
     height: 1
-    color: style ? style.tableBorder : "#cccccc"
+    color: control.style ? control.style.tableBorder : "#cccccc"
 }

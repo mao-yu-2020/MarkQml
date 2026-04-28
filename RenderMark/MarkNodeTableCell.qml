@@ -7,16 +7,17 @@ import QtQuick
  * 表头行单元格背景色不同。
  */
 Rectangle {
+    id: control
     property var node: null
     property var style: null
     property Component inlineDelegate: null
 
     width: parent.width
     height: cellFlow.height + 8
-    color: node && node.parentNode && node.parentNode.isHeader
-           ? (style ? style.tableHeaderBg : "#f0f0f0")
+    color: control.node && control.node.parentNode && control.node.parentNode.isHeader
+           ? (control.style ? control.style.tableHeaderBg : "#f0f0f0")
            : "transparent"
-    border.color: style ? style.tableBorder : "#cccccc"
+    border.color: control.style ? control.style.tableBorder : "#cccccc"
     border.width: 1
 
     Flow {
@@ -26,13 +27,13 @@ Rectangle {
         spacing: 0
 
         Repeater {
-            model: node ? node.children : []
+            model: control.node ? control.node.children : []
             delegate: Loader {
-                sourceComponent: inlineDelegate
+                sourceComponent: control.inlineDelegate
                 onLoaded: {
                     if (item) {
-                        item.node = modelData
-                        item.style = style
+                        item.astNode = modelData
+                        item.style = control.style
                     }
                 }
             }

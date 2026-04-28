@@ -6,8 +6,9 @@ import QtQuick
  * 渲染为一个空格。
  */
 Text {
+    id: control
     property var style: null
 
     text: " "
-    font.pixelSize: style ? style.baseFontSize : 14
+    font.pixelSize: control.style ? control.style.baseFontSize : 14
 }

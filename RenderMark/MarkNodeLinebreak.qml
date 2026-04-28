@@ -6,8 +6,9 @@ import QtQuick
  * 渲染为一个换行占位。
  */
 Item {
+    id: control
     property var style: null
 
     width: parent ? parent.width : 0
-    height: style ? style.baseFontSize : 14
+    height: control.style ? control.style.baseFontSize : 14
 }

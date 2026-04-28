@@ -6,6 +6,7 @@ import QtQuick
  * 左侧竖线边框 + 缩进的 Column 排列 block 子节点。
  */
 Item {
+    id: control
     property var node: null
     property var style: null
     property Component blockDelegate: null
@@ -18,7 +19,7 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         width: 4
-        color: style ? style.blockQuoteBorder : "#cccccc"
+        color: control.style ? control.style.blockQuoteBorder : "#cccccc"
     }
 
     Column {
@@ -29,14 +30,14 @@ Item {
         spacing: 8
 
         Repeater {
-            model: node ? node.children : []
+            model: control.node ? control.node.children : []
             delegate: Loader {
                 width: parent.width
-                sourceComponent: blockDelegate
+                sourceComponent: control.blockDelegate
                 onLoaded: {
                     if (item) {
-                        item.node = modelData
-                        item.style = style
+                        item.astNode = modelData
+                        item.style = control.style
                     }
                 }
             }

@@ -6,11 +6,12 @@ import QtQuick
  * 等宽字体显示代码片段。
  */
 Text {
+    id: control
     property var node: null
     property var style: null
 
-    text: node ? node.content : ""
+    text: control.node ? control.node.content : ""
     font.family: "Consolas, monospace"
-    font.pixelSize: style ? style.baseFontSize : 14
-    color: style ? style.textColor : "black"
+    font.pixelSize: control.style ? control.style.baseFontSize : 14
+    color: control.style ? control.style.textColor : "black"
 }

@@ -7,6 +7,7 @@ import QtQuick
  * 注：QML Text 原生不支持删除线，如需实现可在父级通过 Canvas 或自定义方式绘制横线。
  */
 Flow {
+    id: control
     property var node: null
     property var style: null
     property Component inlineDelegate: null
@@ -14,13 +15,13 @@ Flow {
     spacing: 0
 
     Repeater {
-        model: node ? node.children : []
+        model: control.node ? control.node.children : []
         delegate: Loader {
-            sourceComponent: inlineDelegate
+            sourceComponent: control.inlineDelegate
             onLoaded: {
                 if (item) {
-                    item.node = modelData
-                    item.style = style
+                    item.astNode = modelData
+                    item.style = control.style
                 }
             }
         }

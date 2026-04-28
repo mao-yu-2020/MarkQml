@@ -6,6 +6,7 @@ import QtQuick
  * Column 排列 table_row / table_header 子节点。
  */
 Column {
+    id: control
     property var node: null
     property var style: null
     property Component tableRowDelegate: null
@@ -14,14 +15,14 @@ Column {
     spacing: 0
 
     Repeater {
-        model: node ? node.children : []
+        model: control.node ? control.node.children : []
         delegate: Loader {
             width: parent.width
-            sourceComponent: tableRowDelegate
+            sourceComponent: control.tableRowDelegate
             onLoaded: {
                 if (item) {
-                    item.node = modelData
-                    item.style = style
+                    item.astNode = modelData
+                    item.style = control.style
                 }
             }
         }

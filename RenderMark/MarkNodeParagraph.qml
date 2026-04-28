@@ -6,6 +6,7 @@ import QtQuick
  * 使用 Flow 排列 inline 子节点，支持自动换行。
  */
 Flow {
+    id: control
     property var node: null
     property var style: null
     property Component inlineDelegate: null
@@ -14,13 +15,13 @@ Flow {
     spacing: 0
 
     Repeater {
-        model: node ? node.children : []
+        model: control.node ? control.node.children : []
         delegate: Loader {
-            sourceComponent: inlineDelegate
+            sourceComponent: control.inlineDelegate
             onLoaded: {
                 if (item) {
-                    item.node = modelData
-                    item.style = style
+                    item.astNode = modelData
+                    item.style = control.style
                 }
             }
         }

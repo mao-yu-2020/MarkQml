@@ -6,6 +6,7 @@ import QtQuick
  * 用 Column 排列 item 子节点，整体左缩进。
  */
 Column {
+    id: control
     property var node: null
     property var style: null
     property Component itemDelegate: null
@@ -15,14 +16,14 @@ Column {
     leftPadding: 20
 
     Repeater {
-        model: node ? node.children : []
+        model: control.node ? control.node.children : []
         delegate: Loader {
             width: parent.width
-            sourceComponent: itemDelegate
+            sourceComponent: control.itemDelegate
             onLoaded: {
                 if (item) {
-                    item.node = modelData
-                    item.style = style
+                    item.astNode = modelData
+                    item.style = control.style
                 }
             }
         }

@@ -56,7 +56,10 @@ Flickable {
             delegate: Loader {
                 width: parent.width
                 sourceComponent: blockDelegate
-                onLoaded: item.node = modelData
+                onLoaded: {
+                    item.astNode = modelData
+                    item.style = root.markStyle
+                }
             }
         }
     }
@@ -79,31 +82,33 @@ Flickable {
         id: blockDelegate
 
         Loader {
-            property var node: null
+            // 使用 astNode 而非 node，避免与子组件的 node 属性名冲突导致 Unqualified access 警告
+            property var astNode: null
+            property var style: null
 
             source: {
-                if (!node) return ""
-                if (node.isHeading()) return "MarkNodeHeading.qml"
-                if (node.isParagraph()) return "MarkNodeParagraph.qml"
-                if (node.isCodeBlock()) return "MarkNodeCodeBlock.qml"
-                if (node.isList()) return "MarkNodeList.qml"
-                if (node.isBlockQuote()) return "MarkNodeBlockQuote.qml"
-                if (node.isThematicBreak()) return "MarkNodeThematicBreak.qml"
-                if (node.isTable()) return "MarkNodeTable.qml"
+                if (!astNode) return ""
+                if (astNode.isHeading()) return "MarkNodeHeading.qml"
+                if (astNode.isParagraph()) return "MarkNodeParagraph.qml"
+                if (astNode.isCodeBlock()) return "MarkNodeCodeBlock.qml"
+                if (astNode.isList()) return "MarkNodeList.qml"
+                if (astNode.isBlockQuote()) return "MarkNodeBlockQuote.qml"
+                if (astNode.isThematicBreak()) return "MarkNodeThematicBreak.qml"
+                if (astNode.isTable()) return "MarkNodeTable.qml"
                 return ""
             }
 
             onLoaded: {
                 if (!item) return
-                item.node = node
-                item.style = root.markStyle
-                if (node.isHeading() || node.isParagraph())
+                item.node = astNode
+                item.style = style
+                if (astNode.isHeading() || astNode.isParagraph())
                     item.inlineDelegate = inlineDelegate
-                if (node.isList())
+                if (astNode.isList())
                     item.itemDelegate = itemDelegate
-                if (node.isBlockQuote())
+                if (astNode.isBlockQuote())
                     item.blockDelegate = blockDelegate
-                if (node.isTable())
+                if (astNode.isTable())
                     item.tableRowDelegate = tableRowDelegate
             }
         }
@@ -116,30 +121,31 @@ Flickable {
         id: inlineDelegate
 
         Loader {
-            property var node: null
+            property var astNode: null
             property int headingLevel: 0
+            property var style: null
 
             source: {
-                if (!node) return ""
-                if (node.isText()) return "MarkNodeText.qml"
-                if (node.isCode()) return "MarkNodeInlineCode.qml"
-                if (node.isStrong()) return "MarkNodeStrong.qml"
-                if (node.isEmphasis()) return "MarkNodeEmphasis.qml"
-                if (node.isLink()) return "MarkNodeLink.qml"
-                if (node.isImage()) return "MarkNodeImage.qml"
-                if (node.isStrikethrough()) return "MarkNodeStrikethrough.qml"
-                if (node.isSoftbreak()) return "MarkNodeSoftbreak.qml"
-                if (node.isLinebreak()) return "MarkNodeLinebreak.qml"
+                if (!astNode) return ""
+                if (astNode.isText()) return "MarkNodeText.qml"
+                if (astNode.isCode()) return "MarkNodeInlineCode.qml"
+                if (astNode.isStrong()) return "MarkNodeStrong.qml"
+                if (astNode.isEmphasis()) return "MarkNodeEmphasis.qml"
+                if (astNode.isLink()) return "MarkNodeLink.qml"
+                if (astNode.isImage()) return "MarkNodeImage.qml"
+                if (astNode.isStrikethrough()) return "MarkNodeStrikethrough.qml"
+                if (astNode.isSoftbreak()) return "MarkNodeSoftbreak.qml"
+                if (astNode.isLinebreak()) return "MarkNodeLinebreak.qml"
                 return ""
             }
 
             onLoaded: {
                 if (!item) return
-                item.node = node
-                item.style = root.markStyle
-                if (node.isText())
+                item.node = astNode
+                item.style = style
+                if (astNode.isText())
                     item.headingLevel = headingLevel
-                if (node.isStrong() || node.isEmphasis() || node.isLink() || node.isStrikethrough())
+                if (astNode.isStrong() || astNode.isEmphasis() || astNode.isLink() || astNode.isStrikethrough())
                     item.inlineDelegate = inlineDelegate
             }
         }
@@ -152,12 +158,13 @@ Flickable {
         id: itemDelegate
 
         Loader {
-            property var node: null
+            property var astNode: null
+            property var style: null
             source: "MarkNodeItem.qml"
             onLoaded: {
                 if (item) {
-                    item.node = node
-                    item.style = root.markStyle
+                    item.node = astNode
+                    item.style = style
                     item.blockDelegate = blockDelegate
                 }
             }
@@ -168,12 +175,13 @@ Flickable {
         id: tableRowDelegate
 
         Loader {
-            property var node: null
+            property var astNode: null
+            property var style: null
             source: "MarkNodeTableRow.qml"
             onLoaded: {
                 if (item) {
-                    item.node = node
-                    item.style = root.markStyle
+                    item.node = astNode
+                    item.style = style
                     item.tableCellDelegate = tableCellDelegate
                 }
             }
@@ -184,12 +192,13 @@ Flickable {
         id: tableCellDelegate
 
         Loader {
-            property var node: null
+            property var astNode: null
+            property var style: null
             source: "MarkNodeTableCell.qml"
             onLoaded: {
                 if (item) {
-                    item.node = node
-                    item.style = root.markStyle
+                    item.node = astNode
+                    item.style = style
                     item.inlineDelegate = inlineDelegate
                 }
             }
