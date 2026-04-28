@@ -18,25 +18,6 @@ qt_add_qml_module(RenderMark
     VERSION 1.0
     QML_FILES
         RenderMark.qml
-        MarkNodeHeading.qml
-        MarkNodeParagraph.qml
-        MarkNodeCodeBlock.qml
-        MarkNodeList.qml
-        MarkNodeItem.qml
-        MarkNodeBlockQuote.qml
-        MarkNodeThematicBreak.qml
-        MarkNodeTable.qml
-        MarkNodeTableRow.qml
-        MarkNodeTableCell.qml
-        MarkNodeText.qml
-        MarkNodeInlineCode.qml
-        MarkNodeStrong.qml
-        MarkNodeEmphasis.qml
-        MarkNodeLink.qml
-        MarkNodeImage.qml
-        MarkNodeStrikethrough.qml
-        MarkNodeSoftbreak.qml
-        MarkNodeLinebreak.qml
     SOURCES
         Mark.h
         Mark.cpp
