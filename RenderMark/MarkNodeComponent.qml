@@ -64,7 +64,10 @@ Loader {
             setSource('MarkNodeLink.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
-        // if (astNode.isImage())              return null;
+        if (astNode.isImage()) {
+            setSource('MarkNodeImage.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         // if (astNode.isFootnoteReference())  return null;
         if (astNode.isTable()) {
             setSource('MarkNodeTable.qml', {astNode: astNode, astStyle: astStyle})
