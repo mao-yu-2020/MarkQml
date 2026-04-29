@@ -125,10 +125,6 @@ Window {
         }
     }
 
-    Mark {
-        id: _mark
-    }
-
     // 文件对话框
     FileDialog {
         id: fileDialog
@@ -136,9 +132,7 @@ Window {
         nameFilters: ["Markdown files (*.md)", "All files (*)"]
 
         onAccepted: {
-            var localPath = decodeURIComponent(fileDialog.currentFile.toString().replace("file:///", ""))
-            renderMark.markdown = ""
-            renderMark.tree = _mark.parseFile(localPath)
+            renderMark.source = fileDialog.currentFile.toString()
         }
     }
 }

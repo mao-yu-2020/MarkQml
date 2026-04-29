@@ -16,11 +16,14 @@ Flickable {
     // 公共属性
     // -----------------------------------------------------------------------
 
-    /** @brief MarkTree 实例，由 Mark.parse() 或 Mark.end() 生成 */
+    /** @brief MarkTree 实例，通常由内部自动设置 */
     property var tree: null
 
-    /** @brief 直接传入 Markdown 文本（内部自动解析为 tree） */
+    /** @brief 直接传入 Markdown 文本，设置后自动解析并渲染 */
     property string markdown: ""
+
+    /** @brief 本地文件路径或 file:/// URL，设置后自动加载并渲染 */
+    property string source: ""
 
     /** @brief 渲染区域背景色 */
     property color bgColor: "#f4f9ff"
@@ -28,7 +31,10 @@ Flickable {
     /** @brief 基础字体大小 */
     property int baseFontSize: 14
 
-    /** 暴露样式属性 */
+    /** @brief 内置 Markdown 解析器，可直接调用 parse / parseFile / toHtml */
+    property alias parser: _mark
+
+    /** @brief 暴露样式对象 */
     property alias style: markStyle
 
     /** @brief 样式对象，统一传递给所有子组件（QtObject 支持属性变更通知） */
@@ -87,7 +93,7 @@ Flickable {
         bgColor = "#fff7ed"
     }
 
-    // 内部 Mark 解析器
+    // 内置 Mark 解析器
     Mark {
         id: _mark
     }
@@ -95,7 +101,20 @@ Flickable {
     // 当 markdown 文本变化时自动解析
     onMarkdownChanged: {
         if (markdown !== "") {
+            source = ""
             tree = _mark.parse(markdown)
+        }
+    }
+
+    // 当 source 路径变化时自动加载
+    onSourceChanged: {
+        if (source !== "") {
+            markdown = ""
+            var path = source
+            if (path.indexOf("file:///") === 0) {
+                path = decodeURIComponent(path.substring(8))
+            }
+            tree = _mark.parseFile(path)
         }
     }
 
