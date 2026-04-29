@@ -18,7 +18,11 @@ qt_add_qml_module(RenderMark
     VERSION 1.0
     QML_FILES
         RenderMark.qml
-        MarkNodeHeading.qml
+        MarkRowNodeComponent.qml
+        MarkColumnNodeComponent.qml
+        MarkNodeComponent.qml
+        MarkNodeText.qml
+
     SOURCES
         Mark.h
         Mark.cpp

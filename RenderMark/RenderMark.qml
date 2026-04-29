@@ -55,54 +55,16 @@ Flickable {
         height: childrenRect.height
         spacing: 8
 
-
-
         Repeater {
             model: root.tree && root.tree.root ? tree.root.children : []
 
             delegate:  Loader {
                 id: loader
                 required property var modelData
-                property var nodeStyle: root.markStyle
+                property var astStyle: root.markStyle
 
-                Component {
-                    id: _headingComponent
-
-                    MarkNodeHeading {
-                        node: loader.modelData
-                        style: loader.nodeStyle
-                    }
-                }
-
-                sourceComponent: {
-                    if (modelData.isDocument())           return null;
-                    if (modelData.isBlockQuote())         return null;
-                    if (modelData.isList())               return null;
-                    if (modelData.isItem())               return null;
-                    if (modelData.isCodeBlock())          return null;
-                    if (modelData.isHtmlBlock())          return null;
-                    if (modelData.isParagraph())          return null;
-                    if (modelData.isHeading())
-                        return _headingComponent;
-                    if (modelData.isThematicBreak())      return null;
-                    if (modelData.isFootnoteDefinition()) return null;
-                    if (modelData.isText())               return null;
-                    if (modelData.isSoftbreak())          return null;
-                    if (modelData.isLinebreak())          return null;
-                    if (modelData.isCode())               return null;
-                    if (modelData.isHtmlInline())         return null;
-                    if (modelData.isEmphasis())           return null;
-                    if (modelData.isStrong())             return null;
-                    if (modelData.isLink())               return null;
-                    if (modelData.isImage())              return null;
-                    if (modelData.isFootnoteReference())  return null;
-                    if (modelData.isTable())              return null;
-                    if (modelData.isTableHeader())        return null;
-                    if (modelData.isTableRow())           return null;
-                    if (modelData.isTableCell())          return null;
-                    if (modelData.isStrikethrough())      return null;
-                    if (modelData.isUnknown())            return null;
-                    return null;
+                Component.onCompleted: {
+                    setSource('MarkNodeComponent.qml', {astNode: modelData, astStyle: astStyle})
                 }
             }
         }

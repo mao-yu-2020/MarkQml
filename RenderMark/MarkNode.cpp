@@ -107,7 +107,7 @@ bool MarkNode::isSoftbreak() const { return _type == "softbreak"; }
 bool MarkNode::isLinebreak() const { return _type == "linebreak"; }
 bool MarkNode::isCode() const { return _type == "code"; }
 bool MarkNode::isHtmlInline() const { return _type == "html_inline"; }
-bool MarkNode::isEmphasis() const { return _type == "emphasis"; }
+bool MarkNode::isEmphasis() const { return _type == "emph"; }
 bool MarkNode::isStrong() const { return _type == "strong"; }
 bool MarkNode::isLink() const { return _type == "link"; }
 bool MarkNode::isImage() const { return _type == "image"; }
