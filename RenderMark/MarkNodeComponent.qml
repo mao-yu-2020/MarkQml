@@ -60,10 +60,22 @@ Loader {
         }
         // if (astNode.isImage())              return null;
         // if (astNode.isFootnoteReference())  return null;
-        // if (astNode.isTable())              return null;
-        // if (astNode.isTableHeader())        return null;
-        // if (astNode.isTableRow())           return null;
-        // if (astNode.isTableCell())          return null;
+        if (astNode.isTable()) {
+            setSource('MarkNodeTable.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
+        if (astNode.isTableHeader()) {
+            setSource('MarkNodeTableHeader.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
+        if (astNode.isTableRow()) {
+            setSource('MarkNodeTableRow.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
+        if (astNode.isTableCell()) {
+            setSource('MarkNodeTableCell.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         // if (astNode.isStrikethrough())      return null;
         // if (astNode.isUnknown())            return null;
     }
