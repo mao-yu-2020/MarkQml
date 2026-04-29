@@ -14,7 +14,7 @@ Text {
     required property var astStyle
 
     text: astNode.content
+    textFormat: Text.StyledText
     color: astStyle.textColor
     font.pixelSize: astStyle.baseFontSize
-    wrapMode: Text.Wrap
 }
