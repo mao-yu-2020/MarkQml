@@ -58,7 +58,10 @@ Loader {
         // if (astNode.isFootnoteDefinition()) return null;
         // if (astNode.isSoftbreak())          return null;
         // if (astNode.isLinebreak())          return null;
-        // if (astNode.isCode())               return null;
+        if (astNode.isCode()) {
+            setSource('MarkNodeCode.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         // if (astNode.isHtmlInline())         return null;
         if (astNode.isLink()) {
             setSource('MarkNodeLink.qml', {astNode: astNode, astStyle: astStyle})
