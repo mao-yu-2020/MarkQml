@@ -18,7 +18,5 @@ Rectangle {
     width: parent && parent.parent && parent.parent ? parent.parent.width : 0
     height: 2
 
-    Component.onCompleted: {
-        // console.log('object name: ', parent.parent.parent.objectName)
-    }
+
 }

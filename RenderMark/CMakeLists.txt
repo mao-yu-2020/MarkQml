@@ -31,8 +31,6 @@ qt_add_qml_module(RenderMark
         MarkNodeEmphasis.qml
         MarkNodeStrikethrough.qml
         MarkNodeTable.qml
-        MarkNodeTableHeader.qml
-        MarkNodeTableRow.qml
         MarkNodeTableCell.qml
         MarkNodeBlockQuote.qml
         MarkNodeThematicBreak.qml

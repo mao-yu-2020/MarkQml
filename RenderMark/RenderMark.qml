@@ -22,14 +22,14 @@ Flickable {
     /** @brief 直接传入 Markdown 文本（内部自动解析为 tree） */
     property string markdown: ""
 
-    // 样式配置
-    property color textColor: "black"
-    property color linkColor: "#0066cc"
-    property color codeBackground: "#f5f5f5"
-    property color blockQuoteBorder: "#cccccc"
-    property color tableBorder: "#cccccc"
-    property color tableHeaderBg: "#f0f0f0"
-    property color bgColor: "#ffffff"
+    // 样式配置（默认冷色调）
+    property color textColor: "#2c3e50"
+    property color linkColor: "#3498db"
+    property color codeBackground: "#eaf2f8"
+    property color blockQuoteBorder: "#bdc3c7"
+    property color tableBorder: "#bdc3c7"
+    property color tableHeaderBg: "#d6eaf8"
+    property color bgColor: "#f4f9ff"
     property int baseFontSize: 14
 
     // -----------------------------------------------------------------------

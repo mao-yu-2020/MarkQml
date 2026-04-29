@@ -98,11 +98,11 @@ Loader {
             return;
         }
         if (astNode.isTableHeader()) {
-            setSource('MarkNodeTableHeader.qml', {astNode: astNode, astStyle: astStyle})
+            setSource('MarkRowNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
         if (astNode.isTableRow()) {
-            setSource('MarkNodeTableRow.qml', {astNode: astNode, astStyle: astStyle})
+            setSource('MarkRowNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
         if (astNode.isTableCell()) {
