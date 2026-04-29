@@ -48,43 +48,43 @@ Flickable {
     // -----------------------------------------------------------------------
 
     function setLightTheme() {
-        markStyle.textColor = "black"
-        markStyle.linkColor = "#0066cc"
-        markStyle.codeBackground = "#f5f5f5"
-        markStyle.blockQuoteBorder = "#cccccc"
-        markStyle.tableBorder = "#cccccc"
-        markStyle.tableHeaderBg = "#f0f0f0"
+        markStyle.textColor = "#1a1a2e"
+        markStyle.linkColor = "#2563eb"
+        markStyle.codeBackground = "#f1f5f9"
+        markStyle.blockQuoteBorder = "#3b82f6"
+        markStyle.tableBorder = "#cbd5e1"
+        markStyle.tableHeaderBg = "#e2e8f0"
         bgColor = "#ffffff"
     }
 
     function setDarkTheme() {
-        markStyle.textColor = "#e0e0e0"
-        markStyle.linkColor = "#4dabf7"
-        markStyle.codeBackground = "#2d2d2d"
-        markStyle.blockQuoteBorder = "#444444"
-        markStyle.tableBorder = "#444444"
-        markStyle.tableHeaderBg = "#2d2d2d"
-        bgColor = "#1e1e1e"
+        markStyle.textColor = "#f1f5f9"
+        markStyle.linkColor = "#60a5fa"
+        markStyle.codeBackground = "#27272a"
+        markStyle.blockQuoteBorder = "#a78bfa"
+        markStyle.tableBorder = "#52525b"
+        markStyle.tableHeaderBg = "#18181b"
+        bgColor = "#0a0a0f"
     }
 
     function setColdTheme() {
-        markStyle.textColor = "#2c3e50"
-        markStyle.linkColor = "#3498db"
-        markStyle.codeBackground = "#eaf2f8"
-        markStyle.blockQuoteBorder = "#bdc3c7"
-        markStyle.tableBorder = "#bdc3c7"
-        markStyle.tableHeaderBg = "#d6eaf8"
-        bgColor = "#f4f9ff"
+        markStyle.textColor = "#0c4a6e"
+        markStyle.linkColor = "#0891b2"
+        markStyle.codeBackground = "#ecfeff"
+        markStyle.blockQuoteBorder = "#22d3ee"
+        markStyle.tableBorder = "#7dd3fc"
+        markStyle.tableHeaderBg = "#bae6fd"
+        bgColor = "#f0f9ff"
     }
 
     function setWarmTheme() {
-        markStyle.textColor = "#4a3728"
-        markStyle.linkColor = "#e67e22"
-        markStyle.codeBackground = "#fdf2e9"
-        markStyle.blockQuoteBorder = "#d5c4a1"
-        markStyle.tableBorder = "#d5c4a1"
-        markStyle.tableHeaderBg = "#fdebd0"
-        bgColor = "#fffaf5"
+        markStyle.textColor = "#431407"
+        markStyle.linkColor = "#ea580c"
+        markStyle.codeBackground = "#ffedd5"
+        markStyle.blockQuoteBorder = "#f97316"
+        markStyle.tableBorder = "#fdba74"
+        markStyle.tableHeaderBg = "#fed7aa"
+        bgColor = "#fff7ed"
     }
 
     // 内部 Mark 解析器

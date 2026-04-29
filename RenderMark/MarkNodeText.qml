@@ -69,9 +69,4 @@ Label {
         }
         return false;
     }
-
-    Component.onCompleted: {
-        console.log("content: ", astNode.content)
-    }
-
 }
