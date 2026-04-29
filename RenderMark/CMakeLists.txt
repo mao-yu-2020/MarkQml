@@ -25,6 +25,7 @@ qt_add_qml_module(RenderMark
         MarkNodeItem.qml
         MarkNodeCode.qml
         MarkNodeCodeBlock.qml
+        MarkNodeLink.qml
 
     SOURCES
         Mark.h

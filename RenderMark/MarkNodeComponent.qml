@@ -54,7 +54,10 @@ Loader {
         // if (astNode.isLinebreak())          return null;
         // if (astNode.isCode())               return null;
         // if (astNode.isHtmlInline())         return null;
-        // if (astNode.isLink())               return null;
+        if (astNode.isLink()) {
+            setSource('MarkNodeLink.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         // if (astNode.isImage())              return null;
         // if (astNode.isFootnoteReference())  return null;
         // if (astNode.isTable())              return null;
