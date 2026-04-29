@@ -48,12 +48,12 @@ Loader {
         }
 
         if (astNode.isStrong()) {
-            setSource('MarkNodeText.qml', {astNode: astNode.children[0], astStyle: astStyle})
+            setSource('MarkNodeStrong.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
 
         if (astNode.isEmphasis()) {
-            setSource('MarkNodeText.qml', {astNode: astNode.children[0], astStyle: astStyle})
+            setSource('MarkNodeEmphasis.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
 
@@ -110,7 +110,7 @@ Loader {
             return;
         }
         if (astNode.isStrikethrough()) {
-            setSource('MarkNodeText.qml', {astNode: astNode.children[0], astStyle: astStyle})
+            setSource('MarkNodeStrikethrough.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
         if (astNode.isUnknown()) {
