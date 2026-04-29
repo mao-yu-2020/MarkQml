@@ -17,7 +17,10 @@ Loader {
             setSource('MarkNodeItem.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
-        // if (astNode.isCodeBlock())          return null;
+        if (astNode.isCodeBlock()) {
+            setSource('MarkNodeCodeBlock.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         // if (astNode.isHtmlBlock())          return null;
 
         if (astNode.isParagraph()) {
