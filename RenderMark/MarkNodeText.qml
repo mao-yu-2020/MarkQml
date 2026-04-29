@@ -9,17 +9,11 @@ Label {
     required property var astStyle
 
     text: astNode.content
-    font.pixelSize: astStyle.baseFontSize
+    color: astStyle.textColor
 
-    Component.onCompleted: {
-        console.log("content: ", astNode.content)
-
-        let parentNode = astNode.parentNode
-
-        if (!parentNode)
-            return;
-
-        if (parentNode.isHeading()) {
+    font.pixelSize: {
+        let parentNode = astNode.parentNode;
+        if (parentNode && parentNode.isHeading()) {
             switch (parentNode.level) {
             case 1: return astStyle.baseFontSize * 2.0;
             case 2: return astStyle.baseFontSize * 1.75;
@@ -27,10 +21,16 @@ Label {
             case 4: return astStyle.baseFontSize * 1.25;
             case 5: return astStyle.baseFontSize * 1.125;
             case 6: return astStyle.baseFontSize * 1.0;
-            default: return astStyle.baseFontSize;
             }
         }
+        return astStyle.baseFontSize;
+    }
 
+    font.bold:   astNode.parentNode && astNode.parentNode.isStrong()
+    font.italic: astNode.parentNode && astNode.parentNode.isEmphasis()
+
+    Component.onCompleted: {
+        console.log("content: ", astNode.content)
     }
 
 }
