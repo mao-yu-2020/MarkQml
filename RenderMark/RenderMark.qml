@@ -51,6 +51,7 @@ Flickable {
     // 根布局：用 Column 排列顶层 Block 节点
     Column {
         id: contentColumn
+        objectName:  'root column'
         width: childrenRect.width
         height: childrenRect.height
         spacing: 8
@@ -58,14 +59,11 @@ Flickable {
         Repeater {
             model: root.tree && root.tree.root ? tree.root.children : []
 
-            delegate:  Loader {
-                id: loader
+            delegate: MarkNodeComponent {
                 required property var modelData
-                property var astStyle: root.markStyle
 
-                Component.onCompleted: {
-                    setSource('MarkNodeComponent.qml', {astNode: modelData, astStyle: astStyle})
-                }
+                astNode: modelData
+                astStyle: root.markStyle
             }
         }
     }

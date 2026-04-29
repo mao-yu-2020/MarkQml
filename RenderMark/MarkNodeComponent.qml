@@ -51,7 +51,10 @@ Loader {
             return;
         }
 
-        // if (astNode.isThematicBreak())      return null;
+        if (astNode.isThematicBreak()) {
+            setSource('MarkNodeThematicBreak.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         // if (astNode.isFootnoteDefinition()) return null;
         // if (astNode.isSoftbreak())          return null;
         // if (astNode.isLinebreak())          return null;
