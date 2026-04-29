@@ -50,34 +50,65 @@ Flickable {
     }
 
     /** @brief 组件缓存，避免重复解析 QML 文件 */
-    QtObject {
+    Item {
         id: _compCache
-        property Component text:         Qt.createComponent("MarkNodeText.qml")
-        property Component link:         Qt.createComponent("MarkNodeLink.qml")
-        property Component paragraph:    Qt.createComponent("MarkRowNodeComponent.qml")
-        property Component heading:      Qt.createComponent("MarkRowNodeComponent.qml")
-        property Component list:         Qt.createComponent("MarkColumnNodeComponent.qml")
-        property Component item:         Qt.createComponent("MarkNodeItem.qml")
-        property Component codeBlock:    Qt.createComponent("MarkNodeCodeBlock.qml")
-        property Component code:         Qt.createComponent("MarkNodeCode.qml")
-        property Component blockQuote:   Qt.createComponent("MarkNodeBlockQuote.qml")
-        property Component thematicBreak: Qt.createComponent("MarkNodeThematicBreak.qml")
-        property Component table:        Qt.createComponent("MarkNodeTable.qml")
-        property Component tableCell:    Qt.createComponent("MarkNodeTableCell.qml")
-        property Component image:        Qt.createComponent("MarkNodeImage.qml")
-        property Component document:     Qt.createComponent("MarkNodeDocument.qml")
-        property Component strong:       Qt.createComponent("MarkNodeStrong.qml")
-        property Component emphasis:     Qt.createComponent("MarkNodeEmphasis.qml")
-        property Component strikethrough: Qt.createComponent("MarkNodeStrikethrough.qml")
-        property Component htmlBlock:    Qt.createComponent("MarkNodeHtmlBlock.qml")
-        property Component htmlInline:   Qt.createComponent("MarkNodeHtmlInline.qml")
-        property Component footnoteDefinition: Qt.createComponent("MarkNodeFootnoteDefinition.qml")
-        property Component footnoteReference: Qt.createComponent("MarkNodeFootnoteReference.qml")
-        property Component softbreak:    Qt.createComponent("MarkNodeSoftbreak.qml")
-        property Component linebreak:    Qt.createComponent("MarkNodeLinebreak.qml")
-        property Component unknown:      Qt.createComponent("MarkNodeUnknown.qml")
-        property Component tableHeader:  Qt.createComponent("MarkRowNodeComponent.qml")
-        property Component tableRow:     Qt.createComponent("MarkRowNodeComponent.qml")
+        visible: false
+        width: 0
+        height: 0
+
+        Component { id: _cText;         MarkNodeText {} }
+        Component { id: _cLink;         MarkNodeLink {} }
+        Component { id: _cParagraph;    MarkRowNodeComponent {} }
+        Component { id: _cHeading;      MarkRowNodeComponent {} }
+        Component { id: _cList;         MarkColumnNodeComponent {} }
+        Component { id: _cItem;         MarkNodeItem {} }
+        Component { id: _cCodeBlock;    MarkNodeCodeBlock {} }
+        Component { id: _cCode;         MarkNodeCode {} }
+        Component { id: _cBlockQuote;   MarkNodeBlockQuote {} }
+        Component { id: _cThematicBreak; MarkNodeThematicBreak {} }
+        Component { id: _cTable;        MarkNodeTable {} }
+        Component { id: _cTableCell;    MarkNodeTableCell {} }
+        Component { id: _cImage;        MarkNodeImage {} }
+        Component { id: _cDocument;     MarkNodeDocument {} }
+        Component { id: _cStrong;       MarkNodeStrong {} }
+        Component { id: _cEmphasis;     MarkNodeEmphasis {} }
+        Component { id: _cStrikethrough; MarkNodeStrikethrough {} }
+        Component { id: _cHtmlBlock;    MarkNodeHtmlBlock {} }
+        Component { id: _cHtmlInline;   MarkNodeHtmlInline {} }
+        Component { id: _cFootnoteDefinition; MarkNodeFootnoteDefinition {} }
+        Component { id: _cFootnoteReference; MarkNodeFootnoteReference {} }
+        Component { id: _cSoftbreak;    MarkNodeSoftbreak {} }
+        Component { id: _cLinebreak;    MarkNodeLinebreak {} }
+        Component { id: _cUnknown;      MarkNodeUnknown {} }
+        Component { id: _cTableHeader;  MarkRowNodeComponent {} }
+        Component { id: _cTableRow;     MarkRowNodeComponent {} }
+
+        property alias text: _cText
+        property alias link: _cLink
+        property alias paragraph: _cParagraph
+        property alias heading: _cHeading
+        property alias list: _cList
+        property alias item: _cItem
+        property alias codeBlock: _cCodeBlock
+        property alias code: _cCode
+        property alias blockQuote: _cBlockQuote
+        property alias thematicBreak: _cThematicBreak
+        property alias table: _cTable
+        property alias tableCell: _cTableCell
+        property alias image: _cImage
+        property alias document: _cDocument
+        property alias strong: _cStrong
+        property alias emphasis: _cEmphasis
+        property alias strikethrough: _cStrikethrough
+        property alias htmlBlock: _cHtmlBlock
+        property alias htmlInline: _cHtmlInline
+        property alias footnoteDefinition: _cFootnoteDefinition
+        property alias footnoteReference: _cFootnoteReference
+        property alias softbreak: _cSoftbreak
+        property alias linebreak: _cLinebreak
+        property alias unknown: _cUnknown
+        property alias tableHeader: _cTableHeader
+        property alias tableRow: _cTableRow
     }
 
     // -----------------------------------------------------------------------
@@ -133,6 +164,7 @@ Flickable {
     onMarkdownChanged: {
         if (markdown !== "") {
             source = ""
+            tree = null
             tree = _mark.parse(markdown)
         }
     }
