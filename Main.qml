@@ -105,6 +105,10 @@ Window {
         }
     }
 
+    Mark {
+        id: _mark
+    }
+
     // 文件对话框
     FileDialog {
         id: fileDialog
