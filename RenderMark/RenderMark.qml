@@ -29,7 +29,68 @@ Flickable {
     property color blockQuoteBorder: "#cccccc"
     property color tableBorder: "#cccccc"
     property color tableHeaderBg: "#f0f0f0"
+    property color bgColor: "#ffffff"
     property int baseFontSize: 14
+
+    // -----------------------------------------------------------------------
+    // 主题切换函数
+    // -----------------------------------------------------------------------
+
+    function _refresh() {
+        if (tree) {
+            var t = tree
+            tree = null
+            Qt.callLater(function() { tree = t })
+        } else if (markdown !== "") {
+            var m = markdown
+            markdown = ""
+            Qt.callLater(function() { markdown = m })
+        }
+    }
+
+    function setLightTheme() {
+        textColor = "black"
+        linkColor = "#0066cc"
+        codeBackground = "#f5f5f5"
+        blockQuoteBorder = "#cccccc"
+        tableBorder = "#cccccc"
+        tableHeaderBg = "#f0f0f0"
+        bgColor = "#ffffff"
+        _refresh()
+    }
+
+    function setDarkTheme() {
+        textColor = "#e0e0e0"
+        linkColor = "#4dabf7"
+        codeBackground = "#2d2d2d"
+        blockQuoteBorder = "#444444"
+        tableBorder = "#444444"
+        tableHeaderBg = "#2d2d2d"
+        bgColor = "#1e1e1e"
+        _refresh()
+    }
+
+    function setColdTheme() {
+        textColor = "#2c3e50"
+        linkColor = "#3498db"
+        codeBackground = "#eaf2f8"
+        blockQuoteBorder = "#bdc3c7"
+        tableBorder = "#bdc3c7"
+        tableHeaderBg = "#d6eaf8"
+        bgColor = "#f4f9ff"
+        _refresh()
+    }
+
+    function setWarmTheme() {
+        textColor = "#4a3728"
+        linkColor = "#e67e22"
+        codeBackground = "#fdf2e9"
+        blockQuoteBorder = "#d5c4a1"
+        tableBorder = "#d5c4a1"
+        tableHeaderBg = "#fdebd0"
+        bgColor = "#fffaf5"
+        _refresh()
+    }
 
     // 内部 Mark 解析器
     Mark {

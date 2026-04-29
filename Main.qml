@@ -68,6 +68,30 @@ Window {
                 }
             }
 
+            RowLayout {
+                spacing: 4
+                Button {
+                    text: "☀️ 亮色"
+                    flat: true
+                    onClicked: renderMark.setLightTheme()
+                }
+                Button {
+                    text: "🌙 暗色"
+                    flat: true
+                    onClicked: renderMark.setDarkTheme()
+                }
+                Button {
+                    text: "❄️ 冷色"
+                    flat: true
+                    onClicked: renderMark.setColdTheme()
+                }
+                Button {
+                    text: "🔥 暖色"
+                    flat: true
+                    onClicked: renderMark.setWarmTheme()
+                }
+            }
+
             Label {
                 text: "MarkQml 渲染测试"
                 font.pixelSize: 18
@@ -91,7 +115,7 @@ Window {
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: "#fafafa"
+            color: renderMark.bgColor
             border.color: "#dddddd"
             border.width: 1
             radius: 4
