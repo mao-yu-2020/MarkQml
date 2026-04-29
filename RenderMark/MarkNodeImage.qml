@@ -13,11 +13,31 @@ import QtQuick.Controls
 Item {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
 
-    width: image.status === Image.Ready ? image.implicitWidth : 400
-    height: image.status === Image.Ready ? image.implicitHeight : 200
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
+
+    width: 0
+    Binding on width {
+        value: {
+            if (!root.astNode) return 0;
+            return image.status === Image.Ready ? image.implicitWidth : 400;
+        }
+        when: root.astNode !== null
+    }
+
+    height: 0
+    Binding on height {
+        value: {
+            if (!root.astNode) return 0;
+            return image.status === Image.Ready ? image.implicitHeight : 200;
+        }
+        when: root.astNode !== null
+    }
 
     Image {
         id: image
@@ -26,26 +46,40 @@ Item {
         fillMode: Image.PreserveAspectFit
         sourceSize.width: 600
 
-        source: {
-            var url = astNode.url;
-            if (url.indexOf("://") === -1) {
-                url = "file:///" + url.replace(/\\/g, "/");
+        source: ""
+        Binding on source {
+            value: {
+                if (!root.astNode) return "";
+                var url = root.astNode.url;
+                if (url.indexOf("://") === -1) {
+                    url = "file:///" + url.replace(/\\/g, "/");
+                }
+                return url;
             }
-            return url;
+            when: root.astNode !== null
         }
 
         onStatusChanged: {
-            if (status === Image.Error) {
-                console.log("Failed to load image:", astNode.url);
+            if (status === Image.Error && root.astNode) {
+                console.log("Failed to load image:", root.astNode.url);
             }
         }
     }
 
     Rectangle {
+        id: placeholderRect
         visible: image.status !== Image.Ready
         anchors.fill: parent
-        color: root.astStyle.codeBackground
-        border.color: root.astStyle.tableBorder
+        color: "#eaf2f8"
+        Binding on color {
+            value: root.astStyle.codeBackground
+            when: root.astStyle !== null
+        }
+        border.color: "#bdc3c7"
+        Binding on border.color {
+            value: root.astStyle.tableBorder
+            when: root.astStyle !== null
+        }
         border.width: 1
         radius: 4
 
@@ -55,15 +89,31 @@ Item {
 
             Text {
                 text: image.status === Image.Loading ? "加载中..." : "图片加载失败"
-                color: root.astStyle.textColor
-                font.pixelSize: root.astStyle.baseFontSize
+                color: "black"
+                Binding on color {
+                    value: root.astStyle.textColor
+                    when: root.astStyle !== null
+                }
+                font.pixelSize: 14
+                Binding on font.pixelSize {
+                    value: root.astStyle.baseFontSize
+                    when: root.astStyle !== null
+                }
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
             Text {
-                text: root.astNode.url
-                color: root.astStyle.textColor
-                font.pixelSize: root.astStyle.baseFontSize * 0.75
+                text: root.astNode ? root.astNode.url : ""
+                color: "black"
+                Binding on color {
+                    value: root.astStyle.textColor
+                    when: root.astStyle !== null
+                }
+                font.pixelSize: 11
+                Binding on font.pixelSize {
+                    value: root.astStyle.baseFontSize * 0.75
+                    when: root.astStyle !== null
+                }
                 opacity: 0.6
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.parent.width - 32

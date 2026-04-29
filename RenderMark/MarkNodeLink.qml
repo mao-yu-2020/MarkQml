@@ -12,8 +12,14 @@ import QtQuick.Controls
 Item {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
+
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
     width: rowContent.width
     height: rowContent.height
@@ -25,6 +31,7 @@ Item {
         MarkRowNodeComponent {
             astNode: root.astNode
             astStyle: root.astStyle
+            cache: root.cache
         }
     }
 
@@ -36,13 +43,19 @@ Item {
 
         ToolTip {
             visible: mouseArea.containsMouse
-            text: root.astNode.url
+            text: ""
+            Binding on text {
+                value: root.astNode ? root.astNode.url : ""
+                when: root.astNode !== null
+            }
             delay: 500
             timeout: 5000
         }
 
         onClicked: {
-            Qt.openUrlExternally(root.astNode.url)
+            if (root.astNode && root.astNode.url) {
+                Qt.openUrlExternally(root.astNode.url);
+            }
         }
     }
 }

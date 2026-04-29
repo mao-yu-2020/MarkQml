@@ -11,13 +11,20 @@ import QtQuick
 Row {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
+
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
     spacing: 8
 
     // 计算当前 item 在父 list 中的索引，用于有序列表序号
     property int _itemIndex: {
+        if (!root.astNode) return 0;
         let listNode = root.astNode.parentNode;
         if (!listNode || !listNode.isList())
             return 0;
@@ -31,19 +38,30 @@ Row {
     // 左侧标记（bullet 或 number）
     Text {
         id: marker
-        color: root.astStyle.textColor
-        font.pixelSize: root.astStyle.baseFontSize
-        text: {
-            let listNode = root.astNode.parentNode;
-            if (!listNode || !listNode.isList())
+        text: ""
+        Binding on text {
+            value: {
+                if (!root.astNode) return "•";
+                let listNode = root.astNode.parentNode;
+                if (!listNode || !listNode.isList())
+                    return "•";
+                if (listNode.ordered) {
+                    let num = root._itemIndex + listNode.start;
+                    return num + ".";
+                }
                 return "•";
-
-            if (listNode.ordered) {
-                let num = root._itemIndex + listNode.start;
-                return num + ".";
             }
-
-            return "•";
+            when: root.astNode !== null
+        }
+        color: "black"
+        Binding on color {
+            value: root.astStyle.textColor
+            when: root.astStyle !== null
+        }
+        font.pixelSize: 14
+        Binding on font.pixelSize {
+            value: root.astStyle.baseFontSize
+            when: root.astStyle !== null
         }
     }
 
@@ -51,5 +69,6 @@ Row {
     MarkColumnNodeComponent {
         astNode: root.astNode
         astStyle: root.astStyle
+        cache: root.cache
     }
 }

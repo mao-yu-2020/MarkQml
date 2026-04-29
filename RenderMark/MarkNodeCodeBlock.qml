@@ -10,15 +10,23 @@ import QtQuick
 Rectangle {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
 
-    color: root.astStyle.codeBackground
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
+
+    color: "#eaf2f8"
+    Binding on color {
+        value: root.astStyle.codeBackground
+        when: root.astStyle !== null
+    }
     radius: 4
 
     width: childrenRect.width
     height: childrenRect.height
-
 
     // 垂直布局：语言标签 + 代码内容
     Column {
@@ -27,17 +35,41 @@ Rectangle {
         spacing: 4
 
         Text {
-            visible: root.astNode.language !== ""
-            text: root.astNode.language
-            color: root.astStyle.textColor
-            font.pixelSize: root.astStyle.baseFontSize * 0.85
+            visible: root.astNode ? root.astNode.language !== "" : false
+            text: ""
+            Binding on text {
+                value: root.astNode ? root.astNode.language : ""
+                when: root.astNode !== null
+            }
+            color: "black"
+            Binding on color {
+                value: root.astStyle.textColor
+                when: root.astStyle !== null
+            }
+            font.pixelSize: 12
+            Binding on font.pixelSize {
+                value: root.astStyle.baseFontSize * 0.85
+                when: root.astStyle !== null
+            }
             opacity: 0.7
         }
 
         Text {
-            text: root.astNode.content
-            color: root.astStyle.textColor
-            font.pixelSize: root.astStyle.baseFontSize
+            text: ""
+            Binding on text {
+                value: root.astNode ? root.astNode.content : ""
+                when: root.astNode !== null
+            }
+            color: "black"
+            Binding on color {
+                value: root.astStyle.textColor
+                when: root.astStyle !== null
+            }
+            font.pixelSize: 14
+            Binding on font.pixelSize {
+                value: root.astStyle.baseFontSize
+                when: root.astStyle !== null
+            }
             font.family: "Consolas, Courier New, monospace"
             wrapMode: Text.Wrap
         }

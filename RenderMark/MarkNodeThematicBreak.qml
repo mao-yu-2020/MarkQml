@@ -10,13 +10,20 @@ import QtQuick
 Rectangle {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
 
-    color: root.astStyle.blockQuoteBorder
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
-    width: parent && parent.parent && parent.parent ? parent.parent.width : 0
+    color: "#bdc3c7"
+    Binding on color {
+        value: root.astStyle.blockQuoteBorder
+        when: root.astStyle !== null
+    }
+
+    width: parent && parent.width ? parent.width : 0
     height: 2
-
-
 }

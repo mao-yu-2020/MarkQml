@@ -10,10 +10,25 @@ import QtQuick
 Text {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
     text: " "
-    color: astStyle.textColor
-    font.pixelSize: astStyle.baseFontSize
+
+    color: "black"
+    Binding on color {
+        value: root.astStyle.textColor
+        when: root.astStyle !== null
+    }
+
+    font.pixelSize: 14
+    Binding on font.pixelSize {
+        value: root.astStyle.baseFontSize
+        when: root.astStyle !== null
+    }
 }

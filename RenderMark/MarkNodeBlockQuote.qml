@@ -10,10 +10,21 @@ import QtQuick
 Rectangle {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
 
-    color: root.astStyle.codeBackground
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
+
+    color: "transparent"
+    Binding on color {
+        value: root.astStyle.codeBackground
+        when: root.astStyle !== null
+    }
+
     width: leftBar.width + contentColumn.implicitWidth + 12
     height: contentColumn.implicitHeight
     radius: 4
@@ -23,7 +34,11 @@ Rectangle {
         id: leftBar
         width: 4
         height: root.height
-        color: root.astStyle.blockQuoteBorder
+        color: "#bdc3c7"
+        Binding on color {
+            value: root.astStyle.blockQuoteBorder
+            when: root.astStyle !== null
+        }
         radius: 2
     }
 
@@ -35,5 +50,6 @@ Rectangle {
         anchors.leftMargin: 12
         astNode: root.astNode
         astStyle: root.astStyle
+        cache: root.cache
     }
 }

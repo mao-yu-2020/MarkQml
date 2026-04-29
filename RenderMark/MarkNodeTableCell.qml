@@ -12,16 +12,30 @@ import QtQuick.Layouts
 Rectangle {
     id: root
 
-    required property var astNode
-    required property var astStyle
-    required property bool isHeaderRow
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
+    property bool isHeaderRow: false
+
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
     Layout.fillWidth: true
     implicitWidth: cellContent.implicitWidth + 16
     implicitHeight: cellContent.implicitHeight + 16
 
-    color: isHeaderRow ? astStyle.tableHeaderBg : "transparent"
-    border.color: astStyle.tableBorder
+    color: "transparent"
+    Binding on color {
+        value: root.isHeaderRow ? root.astStyle.tableHeaderBg : "transparent"
+        when: root.astStyle !== null
+    }
+    border.color: "#bdc3c7"
+    Binding on border.color {
+        value: root.astStyle.tableBorder
+        when: root.astStyle !== null
+    }
     border.width: 1
 
     MarkRowNodeComponent {
@@ -30,5 +44,6 @@ Rectangle {
         y: 8
         astNode: root.astNode
         astStyle: root.astStyle
+        cache: root.cache
     }
 }

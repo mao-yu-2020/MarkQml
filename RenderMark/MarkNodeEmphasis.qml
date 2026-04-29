@@ -11,13 +11,20 @@ import QtQuick
 Row {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
+
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
     spacing: 0
 
     MarkRowNodeComponent {
         astNode: root.astNode
         astStyle: root.astStyle
+        cache: root.cache
     }
 }

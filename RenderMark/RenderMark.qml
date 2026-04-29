@@ -49,6 +49,37 @@ Flickable {
         property int baseFontSize: root.baseFontSize
     }
 
+    /** @brief 组件缓存，避免重复解析 QML 文件 */
+    QtObject {
+        id: _compCache
+        property Component text:         Qt.createComponent("MarkNodeText.qml")
+        property Component link:         Qt.createComponent("MarkNodeLink.qml")
+        property Component paragraph:    Qt.createComponent("MarkRowNodeComponent.qml")
+        property Component heading:      Qt.createComponent("MarkRowNodeComponent.qml")
+        property Component list:         Qt.createComponent("MarkColumnNodeComponent.qml")
+        property Component item:         Qt.createComponent("MarkNodeItem.qml")
+        property Component codeBlock:    Qt.createComponent("MarkNodeCodeBlock.qml")
+        property Component code:         Qt.createComponent("MarkNodeCode.qml")
+        property Component blockQuote:   Qt.createComponent("MarkNodeBlockQuote.qml")
+        property Component thematicBreak: Qt.createComponent("MarkNodeThematicBreak.qml")
+        property Component table:        Qt.createComponent("MarkNodeTable.qml")
+        property Component tableCell:    Qt.createComponent("MarkNodeTableCell.qml")
+        property Component image:        Qt.createComponent("MarkNodeImage.qml")
+        property Component document:     Qt.createComponent("MarkNodeDocument.qml")
+        property Component strong:       Qt.createComponent("MarkNodeStrong.qml")
+        property Component emphasis:     Qt.createComponent("MarkNodeEmphasis.qml")
+        property Component strikethrough: Qt.createComponent("MarkNodeStrikethrough.qml")
+        property Component htmlBlock:    Qt.createComponent("MarkNodeHtmlBlock.qml")
+        property Component htmlInline:   Qt.createComponent("MarkNodeHtmlInline.qml")
+        property Component footnoteDefinition: Qt.createComponent("MarkNodeFootnoteDefinition.qml")
+        property Component footnoteReference: Qt.createComponent("MarkNodeFootnoteReference.qml")
+        property Component softbreak:    Qt.createComponent("MarkNodeSoftbreak.qml")
+        property Component linebreak:    Qt.createComponent("MarkNodeLinebreak.qml")
+        property Component unknown:      Qt.createComponent("MarkNodeUnknown.qml")
+        property Component tableHeader:  Qt.createComponent("MarkRowNodeComponent.qml")
+        property Component tableRow:     Qt.createComponent("MarkRowNodeComponent.qml")
+    }
+
     // -----------------------------------------------------------------------
     // 主题切换函数
     // -----------------------------------------------------------------------
@@ -144,6 +175,7 @@ Flickable {
 
                     astNode: modelData
                     astStyle: markStyle
+                    cache: _compCache
                 }
             }
         }

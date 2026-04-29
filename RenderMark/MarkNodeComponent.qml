@@ -1,121 +1,70 @@
 import QtQuick
 
+/**
+ * @brief AST 节点分发器
+ *
+ * 根据 astNode 的类型，从组件缓存中选择对应的 Component，
+ * 通过 sourceComponent 动态加载，避免重复解析 QML 文件。
+ */
 Loader {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
 
-    Component.onCompleted: {
-        if (astNode.isDocument()) {
-            setSource('MarkNodeDocument.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isBlockQuote()) {
-            setSource('MarkNodeBlockQuote.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isList()) {
-            setSource('MarkColumnNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isItem()) {
-            setSource('MarkNodeItem.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isCodeBlock()) {
-            setSource('MarkNodeCodeBlock.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isHtmlBlock()) {
-            setSource('MarkNodeHtmlBlock.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
+    sourceComponent: {
+        var node = astNode;
+        var c = cache;
+        if (!c || !node) return null;
 
-        if (astNode.isParagraph()) {
-            setSource('MarkRowNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
+        if (node.isDocument()) return c.document;
+        if (node.isBlockQuote()) return c.blockQuote;
+        if (node.isList()) return c.list;
+        if (node.isItem()) return c.item;
+        if (node.isCodeBlock()) return c.codeBlock;
+        if (node.isParagraph()) return c.paragraph;
+        if (node.isHeading()) return c.heading;
+        if (node.isText()) return c.text;
+        if (node.isStrong()) return c.strong;
+        if (node.isEmphasis()) return c.emphasis;
+        if (node.isThematicBreak()) return c.thematicBreak;
+        if (node.isFootnoteDefinition()) return c.footnoteDefinition;
+        if (node.isSoftbreak()) return c.softbreak;
+        if (node.isLinebreak()) return c.linebreak;
+        if (node.isCode()) return c.code;
+        if (node.isHtmlInline()) return c.htmlInline;
+        if (node.isLink()) return c.link;
+        if (node.isImage()) return c.image;
+        if (node.isFootnoteReference()) return c.footnoteReference;
+        if (node.isTable()) return c.table;
+        if (node.isTableHeader()) return c.tableHeader;
+        if (node.isTableRow()) return c.tableRow;
+        if (node.isTableCell()) return c.tableCell;
+        if (node.isStrikethrough()) return c.strikethrough;
+        if (node.isUnknown()) return c.unknown;
 
-        if (astNode.isHeading()) {
-            setSource('MarkRowNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
+        return null;
+    }
 
-        if (astNode.isText()) {
-            setSource('MarkNodeText.qml', {astNode: astNode, astStyle: astStyle})
-            return;
+    onLoaded: {
+        if (item && item.init) {
+            item.init(root.astNode, root.astStyle);
         }
+        if (item && item.cache !== undefined) {
+            item.cache = root.cache;
+        }
+    }
 
-        if (astNode.isStrong()) {
-            setSource('MarkNodeStrong.qml', {astNode: astNode, astStyle: astStyle})
-            return;
+    onAstNodeChanged: {
+        if (item && item.init && root.astNode !== null) {
+            item.init(root.astNode, root.astStyle);
         }
+    }
 
-        if (astNode.isEmphasis()) {
-            setSource('MarkNodeEmphasis.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-
-        if (astNode.isThematicBreak()) {
-            setSource('MarkNodeThematicBreak.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isFootnoteDefinition()) {
-            setSource('MarkNodeFootnoteDefinition.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isSoftbreak()) {
-            setSource('MarkNodeSoftbreak.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isLinebreak()) {
-            setSource('MarkNodeLinebreak.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isCode()) {
-            setSource('MarkNodeCode.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isHtmlInline()) {
-            setSource('MarkNodeHtmlInline.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isLink()) {
-            setSource('MarkNodeLink.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isImage()) {
-            setSource('MarkNodeImage.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isFootnoteReference()) {
-            setSource('MarkNodeFootnoteReference.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isTable()) {
-            setSource('MarkNodeTable.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isTableHeader()) {
-            setSource('MarkRowNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isTableRow()) {
-            setSource('MarkRowNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isTableCell()) {
-            setSource('MarkNodeTableCell.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isStrikethrough()) {
-            setSource('MarkNodeStrikethrough.qml', {astNode: astNode, astStyle: astStyle})
-            return;
-        }
-        if (astNode.isUnknown()) {
-            setSource('MarkNodeUnknown.qml', {astNode: astNode, astStyle: astStyle})
-            return;
+    onAstStyleChanged: {
+        if (item && item.init && root.astNode !== null) {
+            item.init(root.astNode, root.astStyle);
         }
     }
 }

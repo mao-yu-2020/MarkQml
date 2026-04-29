@@ -11,15 +11,22 @@ import QtQuick.Layouts
 GridLayout {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
 
-    columns: root.astNode.columns
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
+
+    columns: root.astNode ? root.astNode.columns : 1
     rowSpacing: 0
     columnSpacing: 0
 
     Repeater {
         model: {
+            if (!root.astNode) return [];
             let flat = [];
             const rows = root.astNode.children;
             for (let r = 0; r < rows.length; ++r) {
@@ -39,6 +46,7 @@ GridLayout {
             required property var modelData
             astNode: modelData.cellNode
             astStyle: root.astStyle
+            cache: root.cache
             isHeaderRow: modelData.rowNode.isHeader
         }
     }

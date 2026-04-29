@@ -10,20 +10,39 @@ import QtQuick
 Row {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+    property var cache: null
+
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
     spacing: 4
 
     Text {
-        text: "[" + root.astNode.content + "]:"
-        color: root.astStyle.linkColor
-        font.pixelSize: root.astStyle.baseFontSize * 0.85
+        text: ""
+        Binding on text {
+            value: root.astNode ? "[" + root.astNode.content + "]:" : ""
+            when: root.astNode !== null
+        }
+        color: "black"
+        Binding on color {
+            value: root.astStyle.linkColor
+            when: root.astStyle !== null
+        }
+        font.pixelSize: 12
+        Binding on font.pixelSize {
+            value: root.astStyle.baseFontSize * 0.85
+            when: root.astStyle !== null
+        }
         anchors.top: parent.top
     }
 
     MarkColumnNodeComponent {
         astNode: root.astNode
         astStyle: root.astStyle
+        cache: root.cache
     }
 }

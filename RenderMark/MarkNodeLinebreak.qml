@@ -10,8 +10,13 @@ import QtQuick
 Item {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
+
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
 
     width: 0
     height: 0

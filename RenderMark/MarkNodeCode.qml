@@ -10,10 +10,19 @@ import QtQuick
 Rectangle {
     id: root
 
-    required property var astNode
-    required property var astStyle
+    property var astNode: null
+    property var astStyle: null
 
-    color: root.astStyle.codeBackground
+    function init(node, style) {
+        astNode = node;
+        astStyle = style;
+    }
+
+    color: "#eaf2f8"
+    Binding on color {
+        value: root.astStyle.codeBackground
+        when: root.astStyle !== null
+    }
     radius: 3
 
     implicitWidth: textItem.implicitWidth + 12
@@ -22,9 +31,21 @@ Rectangle {
     Text {
         id: textItem
         anchors.centerIn: parent
-        text: root.astNode.content
-        color: root.astStyle.textColor
-        font.pixelSize: root.astStyle.baseFontSize
+        text: ""
+        Binding on text {
+            value: root.astNode ? root.astNode.content : ""
+            when: root.astNode !== null
+        }
+        color: "black"
+        Binding on color {
+            value: root.astStyle.textColor
+            when: root.astStyle !== null
+        }
+        font.pixelSize: 14
+        Binding on font.pixelSize {
+            value: root.astStyle.baseFontSize
+            when: root.astStyle !== null
+        }
         font.family: "Consolas, Courier New, monospace"
     }
 }
