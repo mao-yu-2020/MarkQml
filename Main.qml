@@ -112,13 +112,9 @@ Window {
         }
 
         // 渲染区域
-        Rectangle {
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: renderMark.bgColor
-            border.color: "#dddddd"
-            border.width: 1
-            radius: 4
 
             RenderMark {
                 id: renderMark

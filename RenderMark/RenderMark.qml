@@ -105,30 +105,39 @@ Flickable {
     }
 
     // Flickable 内容区域
-    contentWidth: contentColumn.width
-    contentHeight: contentColumn.height
+    contentWidth: contentRectangle.width
+    contentHeight: contentRectangle.height
     clip: true
 
-    // 根布局：用 Column 排列顶层 Block 节点
-    Column {
-        id: contentColumn
-        objectName:  'root column'
-        width: childrenRect.width
-        height: childrenRect.height
-        spacing: 8
+    Rectangle {
+        id: contentRectangle
 
-        Repeater {
-            model: root.tree && root.tree.root ? tree.root.children : []
+        color: root.bgColor
+        width: contentColumn.width
+        height: contentColumn.height
 
-            delegate: MarkNodeComponent {
-                required property var modelData
+        Column {
+            id: contentColumn
+            width: childrenRect.width
+            height: childrenRect.height
+            spacing: 8
 
-                astNode: modelData
-                astStyle: root.markStyle
+            Repeater {
+                model: root.tree && root.tree.root ? tree.root.children : []
+
+                delegate: MarkNodeComponent {
+                    required property var modelData
+
+                    astNode: modelData
+                    astStyle: root.markStyle
+                }
             }
         }
+
+
     }
 
+    // 根布局：用 Column 排列顶层 Block 节点
     // 样式对象，统一传递给所有子组件
     property var markStyle: ({
                      textColor: textColor,
