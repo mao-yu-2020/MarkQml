@@ -15,7 +15,7 @@ Rectangle {
 
     color: root.astStyle.blockQuoteBorder
 
-    width: parent.parent.width
+    width: parent && parent.parent && parent.parent ? parent.parent.width : 0
     height: 2
 
     Component.onCompleted: {

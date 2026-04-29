@@ -29,9 +29,4 @@ Label {
     font.bold:      astNode.parentNode && astNode.parentNode.isStrong()
     font.italic:    astNode.parentNode && astNode.parentNode.isEmphasis()
     font.underline: astNode.parentNode && astNode.parentNode.isLink()
-
-    Component.onCompleted: {
-        console.log("content: ", astNode.content)
-    }
-
 }
