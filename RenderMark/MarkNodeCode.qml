@@ -18,7 +18,6 @@ Rectangle {
         astStyle = style;
     }
 
-    color: "#eaf2f8"
     Binding on color {
         value: root.astStyle.codeBackground
         when: root.astStyle !== null
@@ -31,17 +30,14 @@ Rectangle {
     Text {
         id: textItem
         anchors.centerIn: parent
-        text: ""
         Binding on text {
             value: root.astNode ? root.astNode.content : ""
             when: root.astNode !== null
         }
-        color: "black"
         Binding on color {
             value: root.astStyle.textColor
             when: root.astStyle !== null
         }
-        font.pixelSize: 14
         Binding on font.pixelSize {
             value: root.astStyle.baseFontSize
             when: root.astStyle !== null

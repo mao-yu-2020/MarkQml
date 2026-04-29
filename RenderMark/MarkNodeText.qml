@@ -20,13 +20,11 @@ Label {
         astStyle = style;
     }
 
-    text: ""
     Binding on text {
         value: root.astNode ? root.astNode.content : ""
         when: root.astNode !== null
     }
 
-    color: "black"
     Binding on color {
         value: {
             if (!root.astNode || !root.astStyle) return "black";

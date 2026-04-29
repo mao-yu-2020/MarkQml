@@ -19,7 +19,6 @@ Rectangle {
         astStyle = style;
     }
 
-    color: "transparent"
     Binding on color {
         value: root.astStyle.codeBackground
         when: root.astStyle !== null
@@ -34,7 +33,6 @@ Rectangle {
         id: leftBar
         width: 4
         height: root.height
-        color: "#bdc3c7"
         Binding on color {
             value: root.astStyle.blockQuoteBorder
             when: root.astStyle !== null

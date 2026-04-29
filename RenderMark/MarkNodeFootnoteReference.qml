@@ -18,19 +18,16 @@ Text {
         astStyle = style;
     }
 
-    text: ""
     Binding on text {
         value: root.astNode ? "[" + root.astNode.content + "]" : ""
         when: root.astNode !== null
     }
 
-    color: "black"
     Binding on color {
         value: root.astStyle.linkColor
         when: root.astStyle !== null
     }
 
-    font.pixelSize: 11
     Binding on font.pixelSize {
         value: root.astStyle.baseFontSize * 0.75
         when: root.astStyle !== null

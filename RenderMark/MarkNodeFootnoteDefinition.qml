@@ -22,17 +22,14 @@ Row {
     spacing: 4
 
     Text {
-        text: ""
         Binding on text {
             value: root.astNode ? "[" + root.astNode.content + "]:" : ""
             when: root.astNode !== null
         }
-        color: "black"
         Binding on color {
             value: root.astStyle.linkColor
             when: root.astStyle !== null
         }
-        font.pixelSize: 12
         Binding on font.pixelSize {
             value: root.astStyle.baseFontSize * 0.85
             when: root.astStyle !== null

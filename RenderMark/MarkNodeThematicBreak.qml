@@ -18,7 +18,6 @@ Rectangle {
         astStyle = style;
     }
 
-    color: "#bdc3c7"
     Binding on color {
         value: root.astStyle.blockQuoteBorder
         when: root.astStyle !== null

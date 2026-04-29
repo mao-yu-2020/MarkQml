@@ -43,7 +43,6 @@ Item {
 
         ToolTip {
             visible: mouseArea.containsMouse
-            text: ""
             Binding on text {
                 value: root.astNode ? root.astNode.url : ""
                 when: root.astNode !== null

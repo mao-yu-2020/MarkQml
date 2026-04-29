@@ -53,12 +53,10 @@ Row {
             }
             when: root.astNode !== null
         }
-        color: "black"
         Binding on color {
             value: root.astStyle.textColor
             when: root.astStyle !== null
         }
-        font.pixelSize: 14
         Binding on font.pixelSize {
             value: root.astStyle.baseFontSize
             when: root.astStyle !== null

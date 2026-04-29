@@ -26,12 +26,10 @@ Rectangle {
     implicitWidth: cellContent.implicitWidth + 16
     implicitHeight: cellContent.implicitHeight + 16
 
-    color: "transparent"
     Binding on color {
         value: root.isHeaderRow ? root.astStyle.tableHeaderBg : "transparent"
         when: root.astStyle !== null
     }
-    border.color: "#bdc3c7"
     Binding on border.color {
         value: root.astStyle.tableBorder
         when: root.astStyle !== null

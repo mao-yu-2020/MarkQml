@@ -21,7 +21,6 @@ Item {
         astStyle = style;
     }
 
-    width: 0
     Binding on width {
         value: {
             if (!root.astNode) return 0;
@@ -30,7 +29,6 @@ Item {
         when: root.astNode !== null
     }
 
-    height: 0
     Binding on height {
         value: {
             if (!root.astNode) return 0;
@@ -46,7 +44,6 @@ Item {
         fillMode: Image.PreserveAspectFit
         sourceSize.width: 600
 
-        source: ""
         Binding on source {
             value: {
                 if (!root.astNode) return "";
@@ -70,12 +67,10 @@ Item {
         id: placeholderRect
         visible: image.status !== Image.Ready
         anchors.fill: parent
-        color: "#eaf2f8"
         Binding on color {
             value: root.astStyle.codeBackground
             when: root.astStyle !== null
         }
-        border.color: "#bdc3c7"
         Binding on border.color {
             value: root.astStyle.tableBorder
             when: root.astStyle !== null
@@ -89,12 +84,10 @@ Item {
 
             Text {
                 text: image.status === Image.Loading ? "加载中..." : "图片加载失败"
-                color: "black"
                 Binding on color {
                     value: root.astStyle.textColor
                     when: root.astStyle !== null
                 }
-                font.pixelSize: 14
                 Binding on font.pixelSize {
                     value: root.astStyle.baseFontSize
                     when: root.astStyle !== null
@@ -104,12 +97,10 @@ Item {
 
             Text {
                 text: root.astNode ? root.astNode.url : ""
-                color: "black"
                 Binding on color {
                     value: root.astStyle.textColor
                     when: root.astStyle !== null
                 }
-                font.pixelSize: 11
                 Binding on font.pixelSize {
                     value: root.astStyle.baseFontSize * 0.75
                     when: root.astStyle !== null
