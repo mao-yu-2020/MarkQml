@@ -9,8 +9,14 @@ Loader {
     Component.onCompleted: {
         // if (astNode.isDocument())           return null;
         // if (astNode.isBlockQuote())         return null;
-        // if (astNode.isList())               return null;
-        // if (astNode.isItem())               return null;
+        if (astNode.isList()) {
+            setSource('MarkColumnNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
+        if (astNode.isItem()) {
+            setSource('MarkNodeItem.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         // if (astNode.isCodeBlock())          return null;
         // if (astNode.isHtmlBlock())          return null;
 

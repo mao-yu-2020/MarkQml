@@ -22,6 +22,7 @@ qt_add_qml_module(RenderMark
         MarkColumnNodeComponent.qml
         MarkNodeComponent.qml
         MarkNodeText.qml
+        MarkNodeItem.qml
 
     SOURCES
         Mark.h
