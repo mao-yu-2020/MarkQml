@@ -8,7 +8,10 @@ Loader {
 
     Component.onCompleted: {
         // if (astNode.isDocument())           return null;
-        // if (astNode.isBlockQuote())         return null;
+        if (astNode.isBlockQuote()) {
+            setSource('MarkNodeBlockQuote.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         if (astNode.isList()) {
             setSource('MarkColumnNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
             return;

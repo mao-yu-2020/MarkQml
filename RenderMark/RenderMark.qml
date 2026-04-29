@@ -81,5 +81,6 @@ Flickable {
                      baseFontSize: baseFontSize
                  })
 
-
+    ScrollBar.vertical: ScrollBar {}
+    ScrollBar.horizontal: ScrollBar {}
 }

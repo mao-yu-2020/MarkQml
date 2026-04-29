@@ -30,6 +30,7 @@ qt_add_qml_module(RenderMark
         MarkNodeTableHeader.qml
         MarkNodeTableRow.qml
         MarkNodeTableCell.qml
+        MarkNodeBlockQuote.qml
 
     SOURCES
         Mark.h
