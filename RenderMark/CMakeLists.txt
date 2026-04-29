@@ -33,6 +33,14 @@ qt_add_qml_module(RenderMark
         MarkNodeTableCell.qml
         MarkNodeBlockQuote.qml
         MarkNodeThematicBreak.qml
+        MarkNodeDocument.qml
+        MarkNodeHtmlBlock.qml
+        MarkNodeFootnoteDefinition.qml
+        MarkNodeSoftbreak.qml
+        MarkNodeLinebreak.qml
+        MarkNodeHtmlInline.qml
+        MarkNodeFootnoteReference.qml
+        MarkNodeUnknown.qml
 
     SOURCES
         Mark.h

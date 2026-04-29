@@ -7,7 +7,10 @@ Loader {
     required property var astStyle
 
     Component.onCompleted: {
-        // if (astNode.isDocument())           return null;
+        if (astNode.isDocument()) {
+            setSource('MarkNodeDocument.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         if (astNode.isBlockQuote()) {
             setSource('MarkNodeBlockQuote.qml', {astNode: astNode, astStyle: astStyle})
             return;
@@ -24,7 +27,10 @@ Loader {
             setSource('MarkNodeCodeBlock.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
-        // if (astNode.isHtmlBlock())          return null;
+        if (astNode.isHtmlBlock()) {
+            setSource('MarkNodeHtmlBlock.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
 
         if (astNode.isParagraph()) {
             setSource('MarkRowNodeComponent.qml', {astNode: astNode, astStyle: astStyle})
@@ -55,14 +61,26 @@ Loader {
             setSource('MarkNodeThematicBreak.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
-        // if (astNode.isFootnoteDefinition()) return null;
-        // if (astNode.isSoftbreak())          return null;
-        // if (astNode.isLinebreak())          return null;
+        if (astNode.isFootnoteDefinition()) {
+            setSource('MarkNodeFootnoteDefinition.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
+        if (astNode.isSoftbreak()) {
+            setSource('MarkNodeSoftbreak.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
+        if (astNode.isLinebreak()) {
+            setSource('MarkNodeLinebreak.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         if (astNode.isCode()) {
             setSource('MarkNodeCode.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
-        // if (astNode.isHtmlInline())         return null;
+        if (astNode.isHtmlInline()) {
+            setSource('MarkNodeHtmlInline.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         if (astNode.isLink()) {
             setSource('MarkNodeLink.qml', {astNode: astNode, astStyle: astStyle})
             return;
@@ -71,7 +89,10 @@ Loader {
             setSource('MarkNodeImage.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
-        // if (astNode.isFootnoteReference())  return null;
+        if (astNode.isFootnoteReference()) {
+            setSource('MarkNodeFootnoteReference.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
         if (astNode.isTable()) {
             setSource('MarkNodeTable.qml', {astNode: astNode, astStyle: astStyle})
             return;
@@ -88,7 +109,13 @@ Loader {
             setSource('MarkNodeTableCell.qml', {astNode: astNode, astStyle: astStyle})
             return;
         }
-        // if (astNode.isStrikethrough())      return null;
-        // if (astNode.isUnknown())            return null;
+        if (astNode.isStrikethrough()) {
+            setSource('MarkNodeText.qml', {astNode: astNode.children[0], astStyle: astStyle})
+            return;
+        }
+        if (astNode.isUnknown()) {
+            setSource('MarkNodeUnknown.qml', {astNode: astNode, astStyle: astStyle})
+            return;
+        }
     }
 }

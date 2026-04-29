@@ -26,7 +26,8 @@ Label {
         return astStyle.baseFontSize;
     }
 
-    font.bold:      astNode.parentNode && astNode.parentNode.isStrong()
-    font.italic:    astNode.parentNode && astNode.parentNode.isEmphasis()
-    font.underline: astNode.parentNode && astNode.parentNode.isLink()
+    font.bold:       astNode.parentNode && astNode.parentNode.isStrong()
+    font.italic:     astNode.parentNode && astNode.parentNode.isEmphasis()
+    font.underline:  astNode.parentNode && astNode.parentNode.isLink()
+    font.strikeout:  astNode.parentNode && astNode.parentNode.isStrikethrough()
 }
