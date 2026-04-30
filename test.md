@@ -152,11 +152,11 @@ echo "Done!"
 
 ### 在线占位图
 
-![随机图片 400x300](https://picsum.photos/400/300)
+![随机图片 400x300](https://micvs-dev.oss-cn-guangzhou.aliyuncs.com/hongjie/user/res/5137669067836465152/4.jpg)
 
-![随机图片 600x400](https://picsum.photos/600/400?random=1)
+![随机图片 600x400](https://micvs-dev.oss-cn-guangzhou.aliyuncs.com/hongjie/user/res/5137669067836465152/4.jpg)
 
-![随机图片 800x200](https://picsum.photos/800/200?random=2)
+![随机图片 800x200](https://micvs-dev.oss-cn-guangzhou.aliyuncs.com/hongjie/user/res/5137669067836465152/4.jpg)
 
 ### 图片与链接组合
 
