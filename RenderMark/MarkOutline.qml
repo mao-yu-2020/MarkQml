@@ -1,25 +1,34 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 
 /**
  * @brief Markdown 大纲预览组件
  *
- * 独立组件，接收纯 JS 对象数组（每项含 text/level/node）并展示为层级列表。
- * 与 Markdown AST / MarkNode 完全解耦，仅依赖外部注入的数据。
+ * 自包含组件，内部维护 heading 映射表与大纲数据。
+ * 可与 RenderMark 的 outline 属性绑定，自动接收 heading 注册与树重建事件。
  * 点击某一项时发出 headingClicked(node) 信号，由外部决定如何滚动定位。
  */
 ListView {
     id: root
 
     // -----------------------------------------------------------------------
-    // 公共属性
+    // 内部状态
     // -----------------------------------------------------------------------
 
+    /** @brief heading 节点到 QML Item 的映射表 */
+    property var headingMap: new Map()
+
     /** @brief 大纲数据，每项为 { text: string, level: int, node: var } */
-    property var modelData: []
+    property var outlineData: []
 
     /** @brief 当前高亮的 heading 节点 */
     property var currentHeading: null
+
+    // -----------------------------------------------------------------------
+    // 外观属性
+    // -----------------------------------------------------------------------
 
     /** @brief 文本颜色 */
     property color textColor: "#2c3e50"
@@ -47,10 +56,47 @@ ListView {
     signal headingClicked(var headingNode)
 
     // -----------------------------------------------------------------------
+    // 公共方法
+    // -----------------------------------------------------------------------
+
+    /**
+     * @brief 注册 heading 节点与其对应的 QML Item
+     * @param node heading 对应的 MarkNode 指针
+     * @param item heading 渲染后的 QML Item
+     */
+    function registerHeading(node, item) {
+        if (node && item)
+            headingMap.set(node, item);
+    }
+
+    /**
+     * @brief 根据 MarkTree 重建大纲数据并清空旧映射
+     * @param tree 当前渲染的 MarkTree 实例（可能为 null）
+     */
+    function rebuild(tree) {
+        headingMap.clear();
+        if (tree) {
+            var headings = tree.findAll("heading");
+            var model = [];
+            for (var i = 0; i < headings.length; i++) {
+                var h = headings[i];
+                model.push({
+                    node: h,
+                    level: h.level,
+                    text: h.plainText ? h.plainText() : ""
+                });
+            }
+            outlineData = model;
+        } else {
+            outlineData = [];
+        }
+    }
+
+    // -----------------------------------------------------------------------
     // 模型
     // -----------------------------------------------------------------------
 
-    model: root.modelData
+    model: root.outlineData
 
     // -----------------------------------------------------------------------
     // Delegate

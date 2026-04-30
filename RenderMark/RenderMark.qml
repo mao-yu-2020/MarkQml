@@ -68,6 +68,9 @@ Flickable {
      */
     signal treeReady(var tree)
 
+    /** @brief 关联的大纲组件，若配置则自动处理默认行为 */
+    property var outline: null
+
     /** @brief 组件缓存，避免重复解析 QML 文件 */
     Item {
         id: _compCache
@@ -197,6 +200,18 @@ Flickable {
             }
             tree = _mark.parseFile(path)
         }
+    }
+
+    // headingNode 信号发射时，若配置了 outline，自动注册
+    onHeadingNode: (node, item) => {
+        if (root.outline && root.outline.registerHeading !== undefined)
+            root.outline.registerHeading(node, item);
+    }
+
+    // treeReady 信号发射时，若配置了 outline，自动重建
+    onTreeReady: (tree) => {
+        if (root.outline && root.outline.rebuild !== undefined)
+            root.outline.rebuild(tree);
     }
 
     // tree 变化时发出 treeReady 信号，通知外部重新渲染已开始
