@@ -49,6 +49,25 @@ Flickable {
         property int baseFontSize: root.baseFontSize
     }
 
+    /**
+     * @brief heading 节点加载完成信号
+     * @param node heading 对应的 MarkNode 指针
+     * @param item heading 渲染后的 QML Item
+     *
+     * 由 RenderMark 在内部 heading 组件加载完成后发出，
+     * 外部使用者可连接此信号来维护 heading 位置映射表及大纲数据。
+     */
+    signal headingNode(var node, var item)
+
+    /**
+     * @brief 树重新渲染完成信号
+     * @param tree 当前渲染的 MarkTree 实例（可能为 null）
+     *
+     * 当 tree 被赋值并开始重新渲染后发出，
+     * 外部使用者可连接此信号来清空旧状态、重建大纲数据等。
+     */
+    signal treeReady(var tree)
+
     /** @brief 组件缓存，避免重复解析 QML 文件 */
     Item {
         id: _compCache
@@ -59,7 +78,7 @@ Flickable {
         Component { id: _cText;         MarkNodeText {} }
         Component { id: _cLink;         MarkNodeLink {} }
         Component { id: _cParagraph;    MarkRowNodeComponent {} }
-        Component { id: _cHeading;      MarkRowNodeComponent {} }
+        Component { id: _cHeading;      MarkNodeHeading {} }
         Component { id: _cList;         MarkColumnNodeComponent {} }
         Component { id: _cItem;         MarkNodeItem {} }
         Component { id: _cCodeBlock;    MarkNodeCodeBlock {} }
@@ -164,7 +183,6 @@ Flickable {
     onMarkdownChanged: {
         if (markdown !== "") {
             source = ""
-            tree = null
             tree = _mark.parse(markdown)
         }
     }
@@ -180,6 +198,30 @@ Flickable {
             tree = _mark.parseFile(path)
         }
     }
+
+    // tree 变化时发出 treeReady 信号，通知外部重新渲染已开始
+    onTreeChanged: {
+        root.treeReady(root.tree)
+    }
+
+    // -----------------------------------------------------------------------
+    // 公共方法
+    // -----------------------------------------------------------------------
+
+    /**
+     * @brief 滚动到指定 heading Item 所在位置
+     * @param item heading 渲染后的 QML Item
+     *
+     * 外部使用者负责维护 node→item 的映射，调用时直接传入 item。
+     */
+    function scrollToHeading(item) {
+        if (!item)
+            return;
+        var pos = item.mapToItem(contentItem, 0, 0);
+        contentY = Math.max(0, pos.y - 20);
+    }
+
+
 
     // Flickable 内容区域
     contentWidth: contentRectangle.width
@@ -208,6 +250,7 @@ Flickable {
                     astNode: modelData
                     astStyle: markStyle
                     cache: _compCache
+                    renderMark: root
                 }
             }
         }

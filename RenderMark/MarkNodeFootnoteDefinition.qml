@@ -13,6 +13,7 @@ Row {
     property var astNode: null
     property var astStyle: null
     property var cache: null
+    property var renderMark: null
 
     function init(node, style) {
         astNode = node;
@@ -41,5 +42,6 @@ Row {
         astNode: root.astNode
         astStyle: root.astStyle
         cache: root.cache
+        renderMark: root.renderMark
     }
 }

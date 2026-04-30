@@ -21,6 +21,8 @@ qt_add_qml_module(RenderMark
         MarkRowNodeComponent.qml
         MarkColumnNodeComponent.qml
         MarkNodeComponent.qml
+        MarkNodeHeading.qml
+        MarkOutline.qml
         MarkNodeText.qml
         MarkNodeItem.qml
         MarkNodeCode.qml

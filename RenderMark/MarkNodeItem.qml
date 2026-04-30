@@ -14,6 +14,7 @@ Row {
     property var astNode: null
     property var astStyle: null
     property var cache: null
+    property var renderMark: null
 
     function init(node, style) {
         astNode = node;
@@ -38,7 +39,7 @@ Row {
     // 左侧标记（bullet 或 number）
     Text {
         id: marker
-        text: ""
+        // text: ""
         Binding on text {
             value: {
                 if (!root.astNode) return "•";
@@ -68,5 +69,6 @@ Row {
         astNode: root.astNode
         astStyle: root.astStyle
         cache: root.cache
+        renderMark: root.renderMark
     }
 }

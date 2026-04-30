@@ -124,6 +124,15 @@ public:
     /** @return 当前节点的逻辑父节点（AST 父节点），若无则返回 nullptr */
     MarkNode *parentNode() const;
 
+    /**
+     * @brief 提取当前节点下所有 text 子节点的纯文本内容
+     * @return 拼接后的纯文本字符串
+     *
+     * 对 heading、paragraph 等容器节点调用可直接获取其可读文本。
+     * QML 中可通过 modelData.plainText() 使用。
+     */
+    Q_INVOKABLE QString plainText() const;
+
     // -----------------------------------------------------------------------
     // Setter（仅在 C++ 构建 AST 时内部使用，不暴露给 QML）
     // -----------------------------------------------------------------------

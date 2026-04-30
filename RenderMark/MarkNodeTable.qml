@@ -14,6 +14,7 @@ GridLayout {
     property var astNode: null
     property var astStyle: null
     property var cache: null
+    property var renderMark: null
 
     function init(node, style) {
         astNode = node;
@@ -47,6 +48,7 @@ GridLayout {
             astNode: modelData.cellNode
             astStyle: root.astStyle
             cache: root.cache
+            renderMark: root.renderMark
             isHeaderRow: modelData.rowNode.isHeader
         }
     }

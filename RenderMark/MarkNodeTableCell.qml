@@ -15,6 +15,7 @@ Rectangle {
     property var astNode: null
     property var astStyle: null
     property var cache: null
+    property var renderMark: null
     property bool isHeaderRow: false
 
     function init(node, style) {
@@ -43,5 +44,6 @@ Rectangle {
         astNode: root.astNode
         astStyle: root.astStyle
         cache: root.cache
+        renderMark: root.renderMark
     }
 }

@@ -11,6 +11,12 @@ Window {
     visible: true
     title: qsTr("MarkQml - Markdown 渲染器")
 
+    /** @brief 外部维护的 heading 映射表，key=MarkNode, value=QML Item */
+    property var headingMap: new Map()
+
+    /** @brief 外部维护的大纲数据，供 MarkOutline 使用 */
+    property var outlineData: []
+
     // 默认展示一段测试 Markdown，方便初次打开即可看到效果
     property string markdownText:
 "# MarkQml 测试文档\n\n" +
@@ -121,6 +127,45 @@ Window {
                 anchors.fill: parent
                 anchors.margins: 16
                 markdown: mainWindow.markdownText
+
+                // heading 创建时由外部存储映射
+                onHeadingNode: (node, item) => mainWindow.headingMap.set(node, item)
+
+                // tree 重新渲染时清空旧状态并重建大纲数据
+                onTreeReady: (tree) => {
+                    mainWindow.headingMap.clear();
+                    if (tree) {
+                        var headings = tree.findAll("heading");
+                        var model = [];
+                        for (var i = 0; i < headings.length; i++) {
+                            var h = headings[i];
+                            model.push({
+                                node: h,
+                                level: h.level,
+                                text: h.plainText ? h.plainText() : ""
+                            });
+                        }
+                        mainWindow.outlineData = model;
+                    } else {
+                        mainWindow.outlineData = [];
+                    }
+                }
+            }
+
+            // 右侧悬浮大纲预览（50% 透明度，用于测试效果）
+            MarkOutline {
+                id: outline
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: 16
+                width: 400
+                modelData: mainWindow.outlineData
+                opacity: 0.5
+                onHeadingClicked: (node) => {
+                    var item = mainWindow.headingMap.get(node);
+                    if (item) renderMark.scrollToHeading(item);
+                }
             }
         }
     }

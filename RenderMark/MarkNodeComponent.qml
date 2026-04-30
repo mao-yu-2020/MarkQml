@@ -12,6 +12,7 @@ Loader {
     property var astNode: null
     property var astStyle: null
     property var cache: null
+    property var renderMark: null
 
     sourceComponent: {
         var node = astNode;
@@ -53,6 +54,17 @@ Loader {
         }
         if (item && item.cache !== undefined) {
             item.cache = root.cache;
+        }
+
+        // 将 renderMark 引用向下传递给加载的 item（如果其支持）
+        if (item && item.renderMark !== undefined) {
+            item.renderMark = root.renderMark;
+        }
+
+        // heading 节点加载完成后向根容器发射信号，由外部维护映射
+        if (root.astNode && root.astNode.isHeading && root.astNode.isHeading()) {
+            if (root.renderMark)
+                root.renderMark.headingNode(root.astNode, item);
         }
     }
 

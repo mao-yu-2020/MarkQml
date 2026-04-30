@@ -126,6 +126,19 @@ MarkNode *MarkNode::parentNode() const
     return qobject_cast<MarkNode *>(QObject::parent());
 }
 
+QString MarkNode::plainText() const
+{
+    if (_type == "text" || _type == "code" || _type == "code_block")
+        return _content;
+
+    QString result;
+    for (MarkNode *child : _children) {
+        if (child)
+            result += child->plainText();
+    }
+    return result;
+}
+
 // ---------------------------------------------------------------------------
 // Setter 实现（仅 C++ 构建 AST 时使用）
 // ---------------------------------------------------------------------------
