@@ -60,12 +60,6 @@ Loader {
         if (item && item.renderMark !== undefined) {
             item.renderMark = root.renderMark;
         }
-
-        // heading 节点加载完成后向根容器发射信号，由外部维护映射
-        if (root.astNode && root.astNode.isHeading && root.astNode.isHeading()) {
-            if (root.renderMark)
-                root.renderMark.headingNode(root.astNode, item);
-        }
     }
 
     onAstNodeChanged: {
