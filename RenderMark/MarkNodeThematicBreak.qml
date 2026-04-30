@@ -23,6 +23,6 @@ Rectangle {
         when: root.astStyle !== null
     }
 
-    width: parent && parent.width ? parent.width : 0
+    width: parent && parent.parent ? parent.parent.width : 0
     height: 2
 }
