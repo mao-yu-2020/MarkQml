@@ -131,7 +131,7 @@ Window {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.margins: 16
-                width: 400
+                width: parent.width / 3
                 opacity: 0.5
                 onHeadingClicked: (node) => {
                     var item = outlineView.headingMap.get(node);

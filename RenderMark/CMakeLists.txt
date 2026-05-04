@@ -54,9 +54,25 @@ qt_add_qml_module(RenderMark
         MarkTree.cpp
 )
 
+
+
+if (ANDROID)
+    set(CMARK_LIBS
+        libcmark-gfm_static
+        libcmark-gfm-extensions_static
+    )
+
+else()
+
+    set(CMARK_LIBS
+        libcmark-gfm
+        libcmark-gfm-extensions
+    )
+
+endif()
+
 target_link_libraries(RenderMark
     PUBLIC
         Qt6::Quick
-        libcmark-gfm
-        libcmark-gfm-extensions
+        ${CMARK_LIBS}
 )
