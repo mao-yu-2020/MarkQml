@@ -15,6 +15,7 @@ Item {
 
     property var astNode: null
     property var astStyle: null
+    property var renderMark: null
 
     function init(node, style) {
         astNode = node;
@@ -48,8 +49,16 @@ Item {
             value: {
                 if (!root.astNode) return "";
                 var url = root.astNode.url;
+
                 if (url.indexOf("://") === -1) {
-                    url = "file:///" + url.replace(/\\/g, "/");
+
+                    if (root.renderMark && root.renderMark.baseUrl) {
+                        var base = root.renderMark.baseUrl.toString();
+                        if (base.charAt(base.length - 1) !== "/") base += "/";
+                        url = base + url.replace(/\\/g, "/");
+                    } else {
+                        url = "file:///" + url.replace(/\\/g, "/");
+                    }
                 }
                 return url;
             }

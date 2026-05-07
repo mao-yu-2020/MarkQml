@@ -9,11 +9,18 @@ A native **Qt 6 + QML** Markdown renderer powered by `cmark-gfm`. It parses Mark
 ## Features
 
 - 🚀 **Pure QML Rendering** — No embedded browser, higher performance and lower memory footprint
+- 📑 **Outline Preview** — Automatically extracts Markdown heading hierarchy into a clickable table of contents; click to scroll to the corresponding heading
 - 🎨 **Four Built-in Themes** — Light / Dark / Cold / Warm, one-click switching with binding-driven live updates
 - 📐 **AST-Driven Componentized Architecture** — Each Markdown node maps to an independent QML component, easy to extend
 - 🔗 **GFM Extension Support** — Tables, strikethrough, task lists, autolinks, and more
 - ⚡ **Component Cache Optimization** — Pre-caches QML `Component` objects to avoid repeated QML file parsing
 - 🛡️ **No Initialization Conflicts** — Eliminates `required property` issues; safely passes AST nodes via `init()` + conditional `Binding`
+
+---
+
+## Screenshot
+
+![Screenshot](./readme_res/run.png)
 
 ---
 
@@ -40,6 +47,7 @@ MarkQml/
     ├── MarkNodeComponent.qml          # [Core dispatcher] Loader + sourceComponent + cache
     ├── MarkColumnNodeComponent.qml    # Block-level vertical layout (Column)
     ├── MarkRowNodeComponent.qml       # Inline horizontal layout (Row)
+    ├── MarkOutline.qml                # Outline preview component (auto-extracts heading hierarchy)
     │
     └── MarkNode*.qml                  # Various node rendering components (20+ files)
 ```
@@ -321,11 +329,46 @@ renderMark.setWarmTheme()   // Warm
 
 ### Loading Local Files
 
+When loading via `source`, set `baseUrl` together so that relative image paths in the document can be resolved correctly:
+
 ```qml
 renderMark.source = "file:///C:/path/to/file.md"
-// Or
+renderMark.baseUrl = "file:///C:/path/to/"
+
+// Or pass the AST directly
 renderMark.tree = renderMark.parser.parseFile("/path/to/file.md")
 ```
+
+### Outline Preview
+
+Bind `MarkOutline` to the `outline` property of `RenderMark` to automatically extract and render the document outline:
+
+```qml
+import RenderMark
+
+RenderMark {
+    id: renderMark
+    anchors.fill: parent
+    markdown: "# Heading 1\n\n## Heading 2\n\nBody text"
+    outline: outlineView   // Bind outline component; headings are registered automatically
+}
+
+MarkOutline {
+    id: outlineView
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    width: parent.width / 4
+    onHeadingClicked: (node, item) => {
+        if (item) renderMark.scrollToHeading(item);
+    }
+}
+```
+
+**Notes**:
+- `MarkOutline` collects heading nodes incrementally via `registerHeading`; no need to pass the AST manually.
+- Clicking an outline item emits `headingClicked(node, item)`, where `item` is the corresponding QML element and can be used directly for scroll positioning.
+- `RenderMark.scrollToHeading(item)` scrolls the view to the heading (with a 20px top margin).
 
 ### Accessing the Built-in Parser
 

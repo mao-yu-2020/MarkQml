@@ -25,6 +25,9 @@ Flickable {
     /** @brief 本地文件路径或 file:/// URL，设置后自动加载并渲染 */
     property string source: ""
 
+    /** @brief 源文件所在目录的 URL，用于解析图片等相对路径 */
+    property url baseUrl: ""
+
     /** @brief 渲染区域背景色 */
     property color bgColor: "#f4f9ff"
 

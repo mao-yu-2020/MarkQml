@@ -149,7 +149,16 @@ Window {
         nameFilters: ["Markdown files (*.md)", "All files (*)"]
 
         onAccepted: {
-            renderMark.source = fileDialog.currentFile.toString()
+            var fileUrl = fileDialog.currentFile.toString()
+            var lastSlash = fileUrl.lastIndexOf("/")
+            if (lastSlash >= 0) {
+                renderMark.baseUrl = fileUrl.substring(0, lastSlash + 1)
+
+                console.log('base url: ', renderMark.baseUrl)
+            }
+
+            renderMark.source = fileUrl
+            console.log('file url: ', fileUrl)
         }
     }
 }

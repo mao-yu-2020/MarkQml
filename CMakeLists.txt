@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(MarkQml VERSION 0.1 LANGUAGES CXX)
+project(MarkQml VERSION 1.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

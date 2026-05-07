@@ -49,16 +49,17 @@ Loader {
     }
 
     onLoaded: {
-        if (item && item.init) {
-            item.init(root.astNode, root.astStyle);
-        }
-        if (item && item.cache !== undefined) {
-            item.cache = root.cache;
-        }
-
         // 将 renderMark 引用向下传递给加载的 item（如果其支持）
         if (item && item.renderMark !== undefined) {
             item.renderMark = root.renderMark;
+        }
+
+        if (item && item.init) {
+            item.init(root.astNode, root.astStyle);
+        }
+
+        if (item && item.cache !== undefined) {
+            item.cache = root.cache;
         }
     }
 

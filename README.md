@@ -9,11 +9,18 @@
 ## 特性
 
 - 🚀 **纯 QML 渲染** — 无需内嵌浏览器，性能更高、内存占用更低
+- 📑 **大纲预览** — 自动提取 Markdown heading 层级，生成可点击目录树，点击后自动滚动定位到对应标题
 - 🎨 **四种内置主题** — 亮色 / 暗色 / 冷色 / 暖色，一键切换，绑定驱动实时生效
 - 📐 **AST 驱动组件化架构** — 每个 Markdown 节点对应独立 QML 组件，易于扩展
 - 🔗 **GFM 扩展支持** — 表格、删除线、任务列表、自动链接等
 - ⚡ **组件缓存优化** — 预缓存 QML `Component` 对象，避免每次重复解析 QML 文件
 - 🛡️ **无初始化冲突** — 取消 `required property`，通过 `init()` + `Binding` 条件绑定安全传递 AST 节点
+
+---
+
+## 运行效果
+
+![运行效果](./readme_res/run.png)
 
 ---
 
@@ -40,6 +47,7 @@ MarkQml/
     ├── MarkNodeComponent.qml          # 【核心分发器】Loader + sourceComponent + 组件缓存
     ├── MarkColumnNodeComponent.qml    # 块级垂直布局（Column）
     ├── MarkRowNodeComponent.qml       # 行内水平布局（Row）
+    ├── MarkOutline.qml                # 大纲预览组件（自动提取 heading 层级）
     │
     └── MarkNode*.qml                  # 各类节点渲染组件（共 20+ 个）
 ```
@@ -321,11 +329,46 @@ renderMark.setWarmTheme()   // 暖色
 
 ### 加载本地文件
 
+通过 `source` 加载时，需同时设置 `baseUrl` 以解析文档中的相对路径图片：
+
 ```qml
 renderMark.source = "file:///C:/path/to/file.md"
-// 或
+renderMark.baseUrl = "file:///C:/path/to/"
+
+// 或直接传入 AST
 renderMark.tree = renderMark.parser.parseFile("/path/to/file.md")
 ```
+
+### 大纲预览
+
+将 `MarkOutline` 绑定到 `RenderMark` 的 `outline` 属性，即可自动提取并渲染文档目录：
+
+```qml
+import RenderMark
+
+RenderMark {
+    id: renderMark
+    anchors.fill: parent
+    markdown: "# 标题一\n\n## 标题二\n\n正文内容"
+    outline: outlineView   // 绑定大纲组件，自动注册 heading
+}
+
+MarkOutline {
+    id: outlineView
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+    width: parent.width / 4
+    onHeadingClicked: (node, item) => {
+        if (item) renderMark.scrollToHeading(item);
+    }
+}
+```
+
+**说明**：
+- `MarkOutline` 内部通过 `registerHeading` 逐条收集 heading 节点，无需手动传入 AST。
+- 点击目录项时发出 `headingClicked(node, item)` 信号，`item` 为对应标题的 QML 元素，可直接用于滚动定位。
+- `RenderMark.scrollToHeading(item)` 会将视图滚动到该标题所在位置（顶部保留 20px 边距）。
 
 ### 读取内置解析器
 
