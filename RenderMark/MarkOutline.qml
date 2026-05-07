@@ -103,6 +103,7 @@ ListView {
     // -----------------------------------------------------------------------
 
     delegate: Rectangle {
+        id: item
         required property var modelData
 
         width: ListView.view.width
@@ -111,11 +112,11 @@ ListView {
 
         Label {
             anchors.verticalCenter: parent.verticalCenter
-            x: (modelData.level - 1) * root.indentSize + 8
-            text: modelData.text || ""
-            color: root.currentHeading === modelData.node ? root.highlightTextColor : root.textColor
-            font.pointSize: root.baseFontSize - (modelData.level > 2 ? 1 : 0)
-            font.bold: modelData.level <= 2
+            x: (item.modelData.level - 1) * root.indentSize + 8
+            text: item.modelData.text || ""
+            color: root.currentHeading === item.modelData.node ? root.highlightTextColor : root.textColor
+            font.pointSize: root.baseFontSize - (item.modelData.level > 2 ? 1 : 0)
+            font.bold: item.modelData.level <= 2
             elide: Text.ElideRight
             width: parent.width - x - 8
         }
@@ -124,7 +125,7 @@ ListView {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-                root.currentHeading = modelData.node;
+                root.currentHeading = item.modelData.node;
                 root.headingClicked(modelData.node);
             }
         }

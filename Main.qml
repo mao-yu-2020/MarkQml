@@ -112,9 +112,11 @@ Window {
         }
 
         // 渲染区域
-        Item {
+        Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            color: renderMark.bgColor
 
             RenderMark {
                 id: renderMark
