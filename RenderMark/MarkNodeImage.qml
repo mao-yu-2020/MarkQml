@@ -70,6 +70,17 @@ Item {
                 console.log("Failed to load image:", root.astNode.url);
             }
         }
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: image.status === Image.Ready
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                if (root.renderMark) {
+                    root.renderMark.clickedImage(image.source);
+                }
+            }
+        }
     }
 
     Rectangle {

@@ -10,6 +10,7 @@
 
 - 🚀 **纯 QML 渲染** — 无需内嵌浏览器，性能更高、内存占用更低
 - 📑 **大纲预览** — 自动提取 Markdown heading 层级，生成可点击目录树，点击后自动滚动定位到对应标题
+- 🖼️ **图片点击放大** — 点击文档中的图片发出 `clickedImage(url)` 信号，由外部实现全屏放大预览
 - 🎨 **四种内置主题** — 亮色 / 暗色 / 冷色 / 暖色，一键切换，绑定驱动实时生效
 - 📐 **AST 驱动组件化架构** — 每个 Markdown 节点对应独立 QML 组件，易于扩展
 - 🔗 **GFM 扩展支持** — 表格、删除线、任务列表、自动链接等
@@ -369,6 +370,52 @@ MarkOutline {
 - `MarkOutline` 内部通过 `registerHeading` 逐条收集 heading 节点，无需手动传入 AST。
 - 点击目录项时发出 `headingClicked(node, item)` 信号，`item` 为对应标题的 QML 元素，可直接用于滚动定位。
 - `RenderMark.scrollToHeading(item)` 会将视图滚动到该标题所在位置（顶部保留 20px 边距）。
+
+### 图片点击放大
+
+`RenderMark` 在内部图片被点击时会发出 `clickedImage(url)` 信号，参数为解析后的完整图片 URL。外部可据此实现放大预览：
+
+```qml
+RenderMark {
+    anchors.fill: parent
+    markdown: "![示例](./image.png)"
+
+    onClickedImage: (url) => {
+        imageOverlay.source = url;
+        imageOverlay.visible = true;
+    }
+}
+
+// 放大预览遮罩（铺满父组件，点击关闭）
+Rectangle {
+    id: imageOverlay
+    property alias source: previewImage.source
+    anchors.fill: parent
+    visible: false
+    color: "#cc000000"
+    z: 100
+
+    Image {
+        id: previewImage
+        anchors.fill: parent
+        anchors.margins: 32
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            imageOverlay.visible = false;
+            previewImage.source = "";
+        }
+    }
+}
+```
+
+**说明**：
+- 只有成功加载的图片才会响应点击（加载失败时显示占位提示，不可点击）。
+- 鼠标悬停在可点击的图片上时会变为手型光标。
 
 ### 读取内置解析器
 

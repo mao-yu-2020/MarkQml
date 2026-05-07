@@ -71,6 +71,14 @@ Flickable {
      */
     signal treeReady(var tree)
 
+    /** @brief 图片被点击信号
+     * @param url 图片解析后的完整 URL
+     *
+     * 由 RenderMark 在内部图片组件被点击后发出，
+     * 外部使用者可连接此信号来实现图片放大预览等功能。
+     */
+    signal clickedImage(var url)
+
     /** @brief 关联的大纲组件，若配置则自动处理默认行为 */
     property var outline: null
 

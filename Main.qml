@@ -124,6 +124,11 @@ Window {
                 anchors.margins: 16
                 markdown: mainWindow.markdownText
                 outline: outlineView
+
+                onClickedImage: (url) => {
+                    imageOverlay.source = url;
+                    imageOverlay.visible = true;
+                }
             }
 
             // 右侧悬浮大纲预览（50% 透明度，用于测试效果）
@@ -137,6 +142,33 @@ Window {
                 opacity: 0.5
                 onHeadingClicked: (node, item) => {
                     if (item) renderMark.scrollToHeading(item);
+                }
+            }
+
+            // 图片放大预览遮罩
+            Rectangle {
+                id: imageOverlay
+                property alias source: previewImage.source
+
+                anchors.fill: parent
+                visible: false
+                color: "#cc000000"
+                z: 100
+
+                Image {
+                    id: previewImage
+                    anchors.fill: parent
+                    anchors.margins: 32
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        imageOverlay.visible = false;
+                        previewImage.source = "";
+                    }
                 }
             }
         }
@@ -153,12 +185,9 @@ Window {
             var lastSlash = fileUrl.lastIndexOf("/")
             if (lastSlash >= 0) {
                 renderMark.baseUrl = fileUrl.substring(0, lastSlash + 1)
-
-                console.log('base url: ', renderMark.baseUrl)
             }
 
             renderMark.source = fileUrl
-            console.log('file url: ', fileUrl)
         }
     }
 }

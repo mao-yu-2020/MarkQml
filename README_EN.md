@@ -10,6 +10,7 @@ A native **Qt 6 + QML** Markdown renderer powered by `cmark-gfm`. It parses Mark
 
 - 🚀 **Pure QML Rendering** — No embedded browser, higher performance and lower memory footprint
 - 📑 **Outline Preview** — Automatically extracts Markdown heading hierarchy into a clickable table of contents; click to scroll to the corresponding heading
+- 🖼️ **Image Click-to-Zoom** — Clicking an image in the document emits `clickedImage(url)`; the consumer implements the full-screen zoom preview
 - 🎨 **Four Built-in Themes** — Light / Dark / Cold / Warm, one-click switching with binding-driven live updates
 - 📐 **AST-Driven Componentized Architecture** — Each Markdown node maps to an independent QML component, easy to extend
 - 🔗 **GFM Extension Support** — Tables, strikethrough, task lists, autolinks, and more
@@ -369,6 +370,52 @@ MarkOutline {
 - `MarkOutline` collects heading nodes incrementally via `registerHeading`; no need to pass the AST manually.
 - Clicking an outline item emits `headingClicked(node, item)`, where `item` is the corresponding QML element and can be used directly for scroll positioning.
 - `RenderMark.scrollToHeading(item)` scrolls the view to the heading (with a 20px top margin).
+
+### Image Click-to-Zoom
+
+`RenderMark` emits `clickedImage(url)` when an internal image is clicked; the argument is the resolved full image URL. The consumer can implement a zoom preview based on this signal:
+
+```qml
+RenderMark {
+    anchors.fill: parent
+    markdown: "![Example](./image.png)"
+
+    onClickedImage: (url) => {
+        imageOverlay.source = url;
+        imageOverlay.visible = true;
+    }
+}
+
+// Zoom overlay (fills parent, click to close)
+Rectangle {
+    id: imageOverlay
+    property alias source: previewImage.source
+    anchors.fill: parent
+    visible: false
+    color: "#cc000000"
+    z: 100
+
+    Image {
+        id: previewImage
+        anchors.fill: parent
+        anchors.margins: 32
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            imageOverlay.visible = false;
+            previewImage.source = "";
+        }
+    }
+}
+```
+
+**Notes**:
+- Only successfully loaded images respond to clicks (a placeholder is shown on load failure and is not clickable).
+- The cursor changes to a pointing hand when hovering over a clickable image.
 
 ### Accessing the Built-in Parser
 
