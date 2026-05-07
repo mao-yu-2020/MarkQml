@@ -209,9 +209,9 @@ Flickable {
     }
 
     // treeReady 信号发射时，若配置了 outline，自动重建
-    onTreeReady: (tree) => {
+    onTreeReady: () => {
         if (root.outline && root.outline.rebuild !== undefined)
-            root.outline.rebuild(tree);
+            root.outline.rebuild();
     }
 
     // tree 变化时发出 treeReady 信号，通知外部重新渲染已开始

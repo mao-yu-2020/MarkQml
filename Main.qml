@@ -135,8 +135,7 @@ Window {
                 anchors.margins: 16
                 width: parent.width / 3
                 opacity: 0.5
-                onHeadingClicked: (node) => {
-                    var item = outlineView.headingMap.get(node);
+                onHeadingClicked: (node, item) => {
                     if (item) renderMark.scrollToHeading(item);
                 }
             }

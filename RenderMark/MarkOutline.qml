@@ -8,7 +8,7 @@ import QtQuick.Controls
  *
  * 自包含组件，内部维护 heading 映射表与大纲数据。
  * 可与 RenderMark 的 outline 属性绑定，自动接收 heading 注册与树重建事件。
- * 点击某一项时发出 headingClicked(node) 信号，由外部决定如何滚动定位。
+ * 点击某一项时发出 headingClicked(node, item) 信号，由外部决定如何滚动定位。
  */
 ListView {
     id: root
@@ -17,10 +17,7 @@ ListView {
     // 内部状态
     // -----------------------------------------------------------------------
 
-    /** @brief heading 节点到 QML Item 的映射表 */
-    property var headingMap: new Map()
-
-    /** @brief 大纲数据，每项为 { text: string, level: int, node: var } */
+    /** @brief 大纲数据，每项为 { text: string, level: int, node: var, item: var } */
     property var outlineData: []
 
     /** @brief 当前高亮的 heading 节点 */
@@ -53,43 +50,34 @@ ListView {
     // -----------------------------------------------------------------------
 
     /** @brief 用户点击某一大纲项 */
-    signal headingClicked(var headingNode)
+    signal headingClicked(var headingNode, var headingItem)
 
     // -----------------------------------------------------------------------
     // 公共方法
     // -----------------------------------------------------------------------
 
     /**
-     * @brief 注册 heading 节点与其对应的 QML Item
+     * @brief 注册 heading 节点与其对应的 QML Item，并追加到大纲数据
      * @param node heading 对应的 MarkNode 指针
      * @param item heading 渲染后的 QML Item
      */
     function registerHeading(node, item) {
-        if (node && item)
-            headingMap.set(node, item);
+        if (node && item) {
+            outlineData.push({
+                node: node,
+                item: item,
+                level: node.level,
+                text: node.plainText ? node.plainText() : ""
+            });
+            outlineData = outlineData;
+        }
     }
 
     /**
-     * @brief 根据 MarkTree 重建大纲数据并清空旧映射
-     * @param tree 当前渲染的 MarkTree 实例（可能为 null）
+     * @brief 重建大纲数据并清空旧数据
      */
-    function rebuild(tree) {
-        headingMap.clear();
-        if (tree) {
-            var headings = tree.findAll("heading");
-            var model = [];
-            for (var i = 0; i < headings.length; i++) {
-                var h = headings[i];
-                model.push({
-                    node: h,
-                    level: h.level,
-                    text: h.plainText ? h.plainText() : ""
-                });
-            }
-            outlineData = model;
-        } else {
-            outlineData = [];
-        }
+    function rebuild() {
+        outlineData = [];
     }
 
     // -----------------------------------------------------------------------
@@ -126,7 +114,7 @@ ListView {
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 root.currentHeading = item.modelData.node;
-                root.headingClicked(modelData.node);
+                root.headingClicked(modelData.node, modelData.item);
             }
         }
     }
