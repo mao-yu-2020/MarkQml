@@ -389,7 +389,8 @@ RenderMark {
     markdown: "..."
 
     headingNodeCallback: (item) => {
-        // item.astNode 是 MarkNode；item.astStyle 是样式对象
+        // item.astNode 是 MarkNode；item.renderMark 指向 RenderMark 自身
+        // item.astStyle 派生自 renderMark.style，可直接读
         console.log("heading", item.astNode.level, item.astNode.plainText())
     }
 
@@ -433,7 +434,7 @@ RenderMark {
 **说明**：
 - 默认全部为 `null`，未配置则跳过。
 - 调用时机为 `Component.onCompleted` 后的下一帧（`Qt.callLater`），保证 `astNode` / `astStyle` / `renderMark` 已就绪。
-- 回调中可访问 `item.astNode`（MarkNode）与 `item.astStyle`（样式对象）。
+- 回调中可访问 `item.astNode`（MarkNode）、`item.astStyle`（派生自 `renderMark.style`）、`item.renderMark`（RenderMark 实例自身，可由此访问 `baseUrl`、`compCache`、其他 callback 等）。
 
 ### 读取内置解析器
 
@@ -458,11 +459,21 @@ RenderMark {
     Component {
         id: customCodeBlock
         Rectangle {
+            id: cb
             property var astNode: null
-            property var astStyle: null
             property var renderMark: null
-            function init(n, s) { astNode = n; astStyle = s }
+            readonly property var astStyle: renderMark ? renderMark.style : null
+
+            function init(node, rm) {
+                astNode = node;
+                renderMark = rm;
+            }
+
             // 自定义渲染逻辑……
+            Binding on color {
+                value: cb.astStyle.codeBackground
+                when: cb.astStyle !== null
+            }
         }
     }
 
@@ -478,10 +489,13 @@ RenderMark {
 
 **自定义组件需遵循的约定**：
 
-- 声明 `property var astNode: null` 与 `property var astStyle: null`
-- 提供 `function init(node, style)`，由 `MarkNodeComponent.onLoaded` 自动调用
-- 如需回调宿主或访问子缓存，再加 `property var renderMark: null` 与 `property var cache: null`
+- 声明 `property var astNode: null` 与 `property var renderMark: null`
+- 提供 `function init(node, rm)`，由 `MarkNodeComponent.onLoaded` 自动调用并赋值 `astNode` 与 `renderMark`
+- 如需访问样式或组件缓存，按需添加派生属性（保持 readonly 跟随 renderMark）：
+  - `readonly property var astStyle: renderMark ? renderMark.style : null`
+  - `readonly property var cache: renderMark ? renderMark.compCache : null`
 - 所有依赖 `astNode` / `astStyle` 的属性都使用 `Binding { when: ... }`，避免在初始化的 null 窗口里抛 `TypeError`
+- 容器组件嵌套使用 `MarkRowNodeComponent` / `MarkColumnNodeComponent` 时，仅传 `astNode` + `renderMark` 即可，astStyle / cache 会由它们自行从 renderMark 派生
 
 未被赋值的属性会自动回退到内置默认实现，因此可以只覆盖关心的几个节点类型。
 

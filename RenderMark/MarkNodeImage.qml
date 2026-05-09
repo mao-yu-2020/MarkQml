@@ -13,12 +13,12 @@ Item {
     id: root
 
     property var astNode: null
-    property var astStyle: null
     property var renderMark: null
+    readonly property var astStyle: renderMark ? renderMark.style : null
 
-    function init(node, style) {
+    function init(node, rm) {
         astNode = node;
-        astStyle = style;
+        renderMark = rm;
     }
 
     Binding on width {

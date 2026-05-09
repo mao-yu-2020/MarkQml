@@ -13,14 +13,14 @@ Rectangle {
     id: root
 
     property var astNode: null
-    property var astStyle: null
-    property var cache: null
     property var renderMark: null
+    readonly property var astStyle: renderMark ? renderMark.style : null
+    readonly property var cache: renderMark ? renderMark.compCache : null
     property bool isHeaderRow: false
 
-    function init(node, style) {
+    function init(node, rm) {
         astNode = node;
-        astStyle = style;
+        renderMark = rm;
     }
 
     Layout.fillWidth: true
@@ -42,8 +42,6 @@ Rectangle {
         x: 8
         y: 8
         astNode: root.astNode
-        astStyle: root.astStyle
-        cache: root.cache
         renderMark: root.renderMark
     }
 }

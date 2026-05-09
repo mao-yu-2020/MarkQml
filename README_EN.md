@@ -389,7 +389,8 @@ RenderMark {
     markdown: "..."
 
     headingNodeCallback: (item) => {
-        // item.astNode is the MarkNode; item.astStyle is the style object
+        // item.astNode is the MarkNode; item.renderMark points back to RenderMark
+        // item.astStyle is derived from renderMark.style and can be read directly
         console.log("heading", item.astNode.level, item.astNode.plainText())
     }
 
@@ -433,7 +434,7 @@ Available callbacks (one per AST node type, 26 total):
 **Notes**:
 - All callbacks default to `null`; unassigned ones are skipped.
 - Invocation timing is one frame after `Component.onCompleted` (`Qt.callLater`), guaranteeing `astNode` / `astStyle` / `renderMark` are all in place.
-- Inside the callback you can access `item.astNode` (MarkNode) and `item.astStyle` (style object).
+- Inside the callback you can access `item.astNode` (MarkNode), `item.astStyle` (derived from `renderMark.style`), and `item.renderMark` (the RenderMark instance itself — gives you `baseUrl`, `compCache`, other callbacks, etc.).
 
 ### Accessing the Built-in Parser
 
@@ -458,11 +459,21 @@ RenderMark {
     Component {
         id: customCodeBlock
         Rectangle {
+            id: cb
             property var astNode: null
-            property var astStyle: null
             property var renderMark: null
-            function init(n, s) { astNode = n; astStyle = s }
+            readonly property var astStyle: renderMark ? renderMark.style : null
+
+            function init(node, rm) {
+                astNode = node;
+                renderMark = rm;
+            }
+
             // Custom rendering logic...
+            Binding on color {
+                value: cb.astStyle.codeBackground
+                when: cb.astStyle !== null
+            }
         }
     }
 
@@ -478,10 +489,13 @@ Overridable property names (one-to-one with AST node types):
 
 **Contract for custom components**:
 
-- Declare `property var astNode: null` and `property var astStyle: null`
-- Provide `function init(node, style)`, which is automatically called by `MarkNodeComponent.onLoaded`
-- If you need to call back into the host or access the child cache, also declare `property var renderMark: null` and `property var cache: null`
+- Declare `property var astNode: null` and `property var renderMark: null`
+- Provide `function init(node, rm)` — `MarkNodeComponent.onLoaded` calls it to assign `astNode` and `renderMark`
+- For style / component cache access, add derived properties as needed (keep them `readonly` so they always track `renderMark`):
+  - `readonly property var astStyle: renderMark ? renderMark.style : null`
+  - `readonly property var cache: renderMark ? renderMark.compCache : null`
 - All properties depending on `astNode` / `astStyle` should use `Binding { when: ... }` to avoid `TypeError` during the brief null window at initialization
+- When nesting `MarkRowNodeComponent` / `MarkColumnNodeComponent` inside a custom component, only pass `astNode` + `renderMark`; `astStyle` / `cache` will be derived from `renderMark` automatically
 
 Properties that are not overridden automatically fall back to the built-in default implementations, so you only need to override the node types you care about.
 

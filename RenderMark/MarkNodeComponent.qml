@@ -3,7 +3,7 @@ import QtQuick
 /**
  * @brief AST 节点分发器
  *
- * 根据 astNode 的类型，从组件缓存中选择对应的 Component，
+ * 根据 astNode 的类型，从 renderMark.compCache 选择对应的 Component，
  * 通过 sourceComponent 动态加载，避免重复解析 QML 文件。
  *
  * 加载完成后会统一派发节点级回调 `<type>NodeCallback`，叶子组件无需自行处理。
@@ -12,8 +12,6 @@ Loader {
     id: root
 
     property var astNode: null
-    property var astStyle: null
-    property var cache: null
     property var renderMark: null
 
     /** AST type 字符串 → RenderMark 上回调属性名的映射（缺省走 unknownNodeCallback） */
@@ -57,10 +55,11 @@ Loader {
     }
 
     sourceComponent: {
-        var node = astNode;
-        var c = cache;
-        if (!c || !node) return null;
+        if (!astNode || !renderMark) return null;
+        var c = renderMark.compCache;
+        if (!c) return null;
 
+        var node = astNode;
         if (node.isDocument()) return c.document;
         if (node.isBlockQuote()) return c.blockQuote;
         if (node.isList()) return c.list;
@@ -91,32 +90,15 @@ Loader {
     }
 
     onLoaded: {
-        // 将 renderMark 引用向下传递给加载的 item（如果其支持）
-        if (item && item.renderMark !== undefined) {
-            item.renderMark = root.renderMark;
-        }
-
         if (item && item.init) {
-            item.init(root.astNode, root.astStyle);
+            item.init(root.astNode, root.renderMark);
         }
-
-        if (item && item.cache !== undefined) {
-            item.cache = root.cache;
-        }
-
-        // 统一派发节点级回调
         Qt.callLater(_dispatchCallback);
     }
 
     onAstNodeChanged: {
         if (item && item.init && root.astNode !== null) {
-            item.init(root.astNode, root.astStyle);
-        }
-    }
-
-    onAstStyleChanged: {
-        if (item && item.init && root.astNode !== null) {
-            item.init(root.astNode, root.astStyle);
+            item.init(root.astNode, root.renderMark);
         }
     }
 }

@@ -11,13 +11,13 @@ Item {
     id: root
 
     property var astNode: null
-    property var astStyle: null
-    property var cache: null
     property var renderMark: null
+    readonly property var astStyle: renderMark ? renderMark.style : null
+    readonly property var cache: renderMark ? renderMark.compCache : null
 
-    function init(n, s) {
+    function init(n, rm) {
         astNode = n;
-        astStyle = s;
+        renderMark = rm;
     }
 
     width: row.width
@@ -26,8 +26,6 @@ Item {
     MarkRowNodeComponent {
         id: row
         astNode: root.astNode
-        astStyle: root.astStyle
-        cache: root.cache
         renderMark: root.renderMark
     }
 }

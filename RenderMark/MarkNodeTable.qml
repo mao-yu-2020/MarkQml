@@ -12,13 +12,13 @@ GridLayout {
     id: root
 
     property var astNode: null
-    property var astStyle: null
-    property var cache: null
+    readonly property var astStyle: renderMark ? renderMark.style : null
+    readonly property var cache: renderMark ? renderMark.compCache : null
     property var renderMark: null
 
-    function init(node, style) {
+    function init(node, rm) {
         astNode = node;
-        astStyle = style;
+        renderMark = rm;
     }
 
     columns: root.astNode ? root.astNode.columns : 1
@@ -46,8 +46,6 @@ GridLayout {
         MarkNodeTableCell {
             required property var modelData
             astNode: modelData.cellNode
-            astStyle: root.astStyle
-            cache: root.cache
             renderMark: root.renderMark
             isHeaderRow: modelData.rowNode.isHeader
         }

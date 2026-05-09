@@ -11,13 +11,13 @@ Rectangle {
     id: root
 
     property var astNode: null
-    property var astStyle: null
-    property var cache: null
+    readonly property var astStyle: renderMark ? renderMark.style : null
+    readonly property var cache: renderMark ? renderMark.compCache : null
     property var renderMark: null
 
-    function init(node, style) {
+    function init(node, rm) {
         astNode = node;
-        astStyle = style;
+        renderMark = rm;
     }
 
     Binding on color {
@@ -48,8 +48,6 @@ Rectangle {
         anchors.top: parent.top
         anchors.leftMargin: 12
         astNode: root.astNode
-        astStyle: root.astStyle
-        cache: root.cache
         renderMark: root.renderMark
     }
 }

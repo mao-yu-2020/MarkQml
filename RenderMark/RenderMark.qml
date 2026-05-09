@@ -291,8 +291,6 @@ Flickable {
                     required property var modelData
 
                     astNode: modelData
-                    astStyle: markStyle
-                    cache: _compCache
                     renderMark: root
                 }
             }
