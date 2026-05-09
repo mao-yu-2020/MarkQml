@@ -1,0 +1,19 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Qt6 COMPONENTS Quick)
+find_dependency(cmark-gfm CONFIG)
+find_dependency(cmark-gfm-extensions CONFIG)
+
+# 创建 RenderMark::RenderMark IMPORTED 目标（手动定义，避免导出 QML 内部资源目标）
+if(NOT TARGET RenderMark::RenderMark)
+    add_library(RenderMark::RenderMark STATIC IMPORTED)
+    set_target_properties(RenderMark::RenderMark PROPERTIES
+        IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}RenderMark${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/RenderMark"
+        INTERFACE_LINK_LIBRARIES "Qt6::Quick;@CMARK_GFM_TARGET@;@CMARK_GFM_EXTENSIONS_TARGET@"
+    )
+endif()
+
+check_required_components(RenderMark)
