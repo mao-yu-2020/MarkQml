@@ -289,9 +289,24 @@ Flickable {
 
                 delegate: MarkNodeComponent {
                     required property var modelData
+                    required property int index
 
                     astNode: modelData
                     renderMark: root
+
+                    opacity: 0
+
+                    Component.onCompleted: opacity = 1
+
+                    Behavior on opacity {
+                        SequentialAnimation {
+                            PauseAnimation { duration: Math.min(index * 40, 600) }
+                            NumberAnimation {
+                                duration: 250
+                                easing.type: Easing.OutQuad
+                            }
+                        }
+                    }
                 }
             }
         }
