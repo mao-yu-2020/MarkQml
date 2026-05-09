@@ -24,6 +24,7 @@ Rectangle {
     }
 
     Layout.fillWidth: true
+    Layout.fillHeight: true
     implicitWidth: cellContent.implicitWidth + 16
     implicitHeight: cellContent.implicitHeight + 16
 
