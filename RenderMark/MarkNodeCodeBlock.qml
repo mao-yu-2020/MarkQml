@@ -6,6 +6,7 @@ import QtQuick
  * @brief 代码块（code_block）渲染组件
  *
  * 带背景色的块级代码区域，支持显示语言标识。
+ * 四周保留 12px 内边距，语言标签以 pill 样式呈现。
  */
 Rectangle {
     id: root
@@ -25,30 +26,48 @@ Rectangle {
     }
     radius: 4
 
-    width: childrenRect.width
-    height: childrenRect.height
+    // 内容区 + 24px 四周留白（12px * 2）
+    width: contentColumn.implicitWidth + 24
+    height: contentColumn.implicitHeight + 24
 
-    // 垂直布局：语言标签 + 代码内容
     Column {
         id: contentColumn
-        anchors.margins: 12
-        spacing: 4
+        x: 12
+        y: 12
+        spacing: 8
 
-        Text {
+        // 语言标签 pill
+        Rectangle {
             visible: root.astNode ? root.astNode.language !== "" : false
-            Binding on text {
-                value: root.astNode ? root.astNode.language : ""
-                when: root.astNode !== null
-            }
+            width: langLabel.implicitWidth + 16
+            height: langLabel.implicitHeight + 8
+            radius: 4
+
             Binding on color {
-                value: root.astStyle.textColor
+                value: {
+                    var c = root.astStyle.textColor;
+                    return Qt.rgba(c.r, c.g, c.b, 0.12);
+                }
                 when: root.astStyle !== null
             }
-            Binding on font.pixelSize {
-                value: root.astStyle.baseFontSize * 0.85
-                when: root.astStyle !== null
+
+            Text {
+                id: langLabel
+                anchors.centerIn: parent
+                Binding on text {
+                    value: root.astNode ? root.astNode.language : ""
+                    when: root.astNode !== null
+                }
+                Binding on color {
+                    value: root.astStyle.textColor
+                    when: root.astStyle !== null
+                }
+                Binding on font.pixelSize {
+                    value: root.astStyle.baseFontSize * 0.8
+                    when: root.astStyle !== null
+                }
+                font.family: "Consolas, Courier New, monospace"
             }
-            opacity: 0.7
         }
 
         Text {
