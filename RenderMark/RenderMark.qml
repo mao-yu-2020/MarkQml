@@ -82,66 +82,81 @@ Flickable {
     /** @brief 关联的大纲组件，若配置则自动处理默认行为 */
     property var outline: null
 
-    /** @brief 组件缓存，避免重复解析 QML 文件 */
+    /**
+     * @brief 组件缓存对外别名
+     *
+     * 外部可通过 `renderMark.compCache.xxx = customComponent` 替换任意节点的渲染组件。
+     * 例如：renderMark.compCache.codeBlock = myCustomCodeBlockComponent
+     */
+    property alias compCache: _compCache
+
+    /**
+     * @brief 组件缓存，避免重复解析 QML 文件
+     *
+     * 每个节点类型对应一个可写的 `property Component`，默认指向内置 _defaultXxx 实现，
+     * 外部赋值后 MarkNodeComponent.sourceComponent 会自动选用新组件。
+     */
     Item {
         id: _compCache
         visible: false
         width: 0
         height: 0
 
-        Component { id: _cText;         MarkNodeText {} }
-        Component { id: _cLink;         MarkNodeLink {} }
-        Component { id: _cParagraph;    MarkRowNodeComponent {} }
-        Component { id: _cHeading;      MarkNodeHeading {} }
-        Component { id: _cList;         MarkColumnNodeComponent {} }
-        Component { id: _cItem;         MarkNodeItem {} }
-        Component { id: _cCodeBlock;    MarkNodeCodeBlock {} }
-        Component { id: _cCode;         MarkNodeCode {} }
-        Component { id: _cBlockQuote;   MarkNodeBlockQuote {} }
-        Component { id: _cThematicBreak; MarkNodeThematicBreak {} }
-        Component { id: _cTable;        MarkNodeTable {} }
-        Component { id: _cTableCell;    MarkNodeTableCell {} }
-        Component { id: _cImage;        MarkNodeImage {} }
-        Component { id: _cDocument;     MarkNodeDocument {} }
-        Component { id: _cStrong;       MarkNodeStrong {} }
-        Component { id: _cEmphasis;     MarkNodeEmphasis {} }
-        Component { id: _cStrikethrough; MarkNodeStrikethrough {} }
-        Component { id: _cHtmlBlock;    MarkNodeHtmlBlock {} }
-        Component { id: _cHtmlInline;   MarkNodeHtmlInline {} }
-        Component { id: _cFootnoteDefinition; MarkNodeFootnoteDefinition {} }
-        Component { id: _cFootnoteReference; MarkNodeFootnoteReference {} }
-        Component { id: _cSoftbreak;    MarkNodeSoftbreak {} }
-        Component { id: _cLinebreak;    MarkNodeLinebreak {} }
-        Component { id: _cUnknown;      MarkNodeUnknown {} }
-        Component { id: _cTableHeader;  MarkRowNodeComponent {} }
-        Component { id: _cTableRow;     MarkRowNodeComponent {} }
+        // 各类节点对应的渲染 Component，外部可重新赋值以替换默认实现
+        property Component text:               _defaultText
+        property Component link:               _defaultLink
+        property Component paragraph:          _defaultParagraph
+        property Component heading:            _defaultHeading
+        property Component list:               _defaultList
+        property Component item:               _defaultItem
+        property Component codeBlock:          _defaultCodeBlock
+        property Component code:               _defaultCode
+        property Component blockQuote:         _defaultBlockQuote
+        property Component thematicBreak:      _defaultThematicBreak
+        property Component table:              _defaultTable
+        property Component tableCell:          _defaultTableCell
+        property Component image:              _defaultImage
+        property Component document:           _defaultDocument
+        property Component strong:             _defaultStrong
+        property Component emphasis:           _defaultEmphasis
+        property Component strikethrough:      _defaultStrikethrough
+        property Component htmlBlock:          _defaultHtmlBlock
+        property Component htmlInline:         _defaultHtmlInline
+        property Component footnoteDefinition: _defaultFootnoteDefinition
+        property Component footnoteReference:  _defaultFootnoteReference
+        property Component softbreak:          _defaultSoftbreak
+        property Component linebreak:          _defaultLinebreak
+        property Component unknown:            _defaultUnknown
+        property Component tableHeader:        _defaultTableHeader
+        property Component tableRow:           _defaultTableRow
 
-        property alias text: _cText
-        property alias link: _cLink
-        property alias paragraph: _cParagraph
-        property alias heading: _cHeading
-        property alias list: _cList
-        property alias item: _cItem
-        property alias codeBlock: _cCodeBlock
-        property alias code: _cCode
-        property alias blockQuote: _cBlockQuote
-        property alias thematicBreak: _cThematicBreak
-        property alias table: _cTable
-        property alias tableCell: _cTableCell
-        property alias image: _cImage
-        property alias document: _cDocument
-        property alias strong: _cStrong
-        property alias emphasis: _cEmphasis
-        property alias strikethrough: _cStrikethrough
-        property alias htmlBlock: _cHtmlBlock
-        property alias htmlInline: _cHtmlInline
-        property alias footnoteDefinition: _cFootnoteDefinition
-        property alias footnoteReference: _cFootnoteReference
-        property alias softbreak: _cSoftbreak
-        property alias linebreak: _cLinebreak
-        property alias unknown: _cUnknown
-        property alias tableHeader: _cTableHeader
-        property alias tableRow: _cTableRow
+        // 内置默认组件实现
+        Component { id: _defaultText;               MarkNodeText {} }
+        Component { id: _defaultLink;               MarkNodeLink {} }
+        Component { id: _defaultParagraph;          MarkRowNodeComponent {} }
+        Component { id: _defaultHeading;            MarkNodeHeading {} }
+        Component { id: _defaultList;               MarkColumnNodeComponent {} }
+        Component { id: _defaultItem;               MarkNodeItem {} }
+        Component { id: _defaultCodeBlock;          MarkNodeCodeBlock {} }
+        Component { id: _defaultCode;               MarkNodeCode {} }
+        Component { id: _defaultBlockQuote;         MarkNodeBlockQuote {} }
+        Component { id: _defaultThematicBreak;      MarkNodeThematicBreak {} }
+        Component { id: _defaultTable;              MarkNodeTable {} }
+        Component { id: _defaultTableCell;          MarkNodeTableCell {} }
+        Component { id: _defaultImage;              MarkNodeImage {} }
+        Component { id: _defaultDocument;           MarkNodeDocument {} }
+        Component { id: _defaultStrong;             MarkNodeStrong {} }
+        Component { id: _defaultEmphasis;           MarkNodeEmphasis {} }
+        Component { id: _defaultStrikethrough;      MarkNodeStrikethrough {} }
+        Component { id: _defaultHtmlBlock;          MarkNodeHtmlBlock {} }
+        Component { id: _defaultHtmlInline;         MarkNodeHtmlInline {} }
+        Component { id: _defaultFootnoteDefinition; MarkNodeFootnoteDefinition {} }
+        Component { id: _defaultFootnoteReference;  MarkNodeFootnoteReference {} }
+        Component { id: _defaultSoftbreak;          MarkNodeSoftbreak {} }
+        Component { id: _defaultLinebreak;          MarkNodeLinebreak {} }
+        Component { id: _defaultUnknown;            MarkNodeUnknown {} }
+        Component { id: _defaultTableHeader;        MarkRowNodeComponent {} }
+        Component { id: _defaultTableRow;           MarkRowNodeComponent {} }
     }
 
     // -----------------------------------------------------------------------

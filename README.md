@@ -428,6 +428,45 @@ var tree = renderMark.parser.parse("# Markdown")
 console.log(tree.printTree())   // 打印树形结构
 ```
 
+### 自定义节点渲染组件
+
+`RenderMark` 内部的组件缓存通过 `compCache` 属性对外暴露，外部可替换任意节点类型的默认渲染组件：
+
+```qml
+RenderMark {
+    id: renderMark
+    markdown: "..."
+
+    Component {
+        id: customCodeBlock
+        Rectangle {
+            property var astNode: null
+            property var astStyle: null
+            property var renderMark: null
+            function init(n, s) { astNode = n; astStyle = s }
+            // 自定义渲染逻辑……
+        }
+    }
+
+    Component.onCompleted: {
+        compCache.codeBlock = customCodeBlock
+    }
+}
+```
+
+可替换的属性名（与 AST 节点类型一一对应）：
+
+`text`、`link`、`paragraph`、`heading`、`list`、`item`、`codeBlock`、`code`、`blockQuote`、`thematicBreak`、`table`、`tableHeader`、`tableRow`、`tableCell`、`image`、`document`、`strong`、`emphasis`、`strikethrough`、`htmlBlock`、`htmlInline`、`footnoteDefinition`、`footnoteReference`、`softbreak`、`linebreak`、`unknown`
+
+**自定义组件需遵循的约定**：
+
+- 声明 `property var astNode: null` 与 `property var astStyle: null`
+- 提供 `function init(node, style)`，由 `MarkNodeComponent.onLoaded` 自动调用
+- 如需回调宿主或访问子缓存，再加 `property var renderMark: null` 与 `property var cache: null`
+- 所有依赖 `astNode` / `astStyle` 的属性都使用 `Binding { when: ... }`，避免在初始化的 null 窗口里抛 `TypeError`
+
+未被赋值的属性会自动回退到内置默认实现，因此可以只覆盖关心的几个节点类型。
+
 ---
 
 ## 许可证

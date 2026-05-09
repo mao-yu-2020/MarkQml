@@ -428,6 +428,45 @@ var tree = renderMark.parser.parse("# Markdown")
 console.log(tree.printTree())   // Print tree structure
 ```
 
+### Custom Node Rendering Components
+
+The internal component cache is exposed via the `compCache` property, allowing you to replace the default rendering component for any node type:
+
+```qml
+RenderMark {
+    id: renderMark
+    markdown: "..."
+
+    Component {
+        id: customCodeBlock
+        Rectangle {
+            property var astNode: null
+            property var astStyle: null
+            property var renderMark: null
+            function init(n, s) { astNode = n; astStyle = s }
+            // Custom rendering logic...
+        }
+    }
+
+    Component.onCompleted: {
+        compCache.codeBlock = customCodeBlock
+    }
+}
+```
+
+Overridable property names (one-to-one with AST node types):
+
+`text`, `link`, `paragraph`, `heading`, `list`, `item`, `codeBlock`, `code`, `blockQuote`, `thematicBreak`, `table`, `tableHeader`, `tableRow`, `tableCell`, `image`, `document`, `strong`, `emphasis`, `strikethrough`, `htmlBlock`, `htmlInline`, `footnoteDefinition`, `footnoteReference`, `softbreak`, `linebreak`, `unknown`
+
+**Contract for custom components**:
+
+- Declare `property var astNode: null` and `property var astStyle: null`
+- Provide `function init(node, style)`, which is automatically called by `MarkNodeComponent.onLoaded`
+- If you need to call back into the host or access the child cache, also declare `property var renderMark: null` and `property var cache: null`
+- All properties depending on `astNode` / `astStyle` should use `Binding { when: ... }` to avoid `TypeError` during the brief null window at initialization
+
+Properties that are not overridden automatically fall back to the built-in default implementations, so you only need to override the node types you care about.
+
 ---
 
 ## License
