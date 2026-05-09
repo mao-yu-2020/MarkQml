@@ -53,16 +53,6 @@ Flickable {
     }
 
     /**
-     * @brief heading 节点加载完成信号
-     * @param node heading 对应的 MarkNode 指针
-     * @param item heading 渲染后的 QML Item
-     *
-     * 由 RenderMark 在内部 heading 组件加载完成后发出，
-     * 外部使用者可连接此信号来维护 heading 位置映射表及大纲数据。
-     */
-    signal headingNode(var node, var item)
-
-    /**
      * @brief 树重新渲染完成信号
      * @param tree 当前渲染的 MarkTree 实例（可能为 null）
      *
@@ -71,16 +61,43 @@ Flickable {
      */
     signal treeReady(var tree)
 
-    /** @brief 图片被点击信号
-     * @param url 图片解析后的完整 URL
-     *
-     * 由 RenderMark 在内部图片组件被点击后发出，
-     * 外部使用者可连接此信号来实现图片放大预览等功能。
-     */
-    signal clickedImage(var url)
-
-    /** @brief 关联的大纲组件，若配置则自动处理默认行为 */
+    /** @brief 关联的大纲组件，若配置则在 treeReady 时自动 rebuild */
     property var outline: null
+
+    // -----------------------------------------------------------------------
+    // 节点渲染完成回调（按节点类型暴露，外部赋值后由对应组件在渲染完成时调用）
+    //
+    // 约定：每个回调签名为 (item) => void，item 为该节点在 QML 中的渲染实例。
+    // 默认 null，未赋值则跳过。回调时机统一为 Component.onCompleted 后的下一帧
+    // （Qt.callLater），保证 astNode/astStyle/renderMark 都已就绪。
+    // -----------------------------------------------------------------------
+
+    property var documentNodeCallback: null
+    property var paragraphNodeCallback: null
+    property var headingNodeCallback: null
+    property var textNodeCallback: null
+    property var linkNodeCallback: null
+    property var imageNodeCallback: null
+    property var listNodeCallback: null
+    property var itemNodeCallback: null
+    property var codeBlockNodeCallback: null
+    property var codeNodeCallback: null
+    property var blockQuoteNodeCallback: null
+    property var thematicBreakNodeCallback: null
+    property var tableNodeCallback: null
+    property var tableHeaderNodeCallback: null
+    property var tableRowNodeCallback: null
+    property var tableCellNodeCallback: null
+    property var strongNodeCallback: null
+    property var emphasisNodeCallback: null
+    property var strikethroughNodeCallback: null
+    property var htmlBlockNodeCallback: null
+    property var htmlInlineNodeCallback: null
+    property var footnoteDefinitionNodeCallback: null
+    property var footnoteReferenceNodeCallback: null
+    property var softbreakNodeCallback: null
+    property var linebreakNodeCallback: null
+    property var unknownNodeCallback: null
 
     /**
      * @brief 组件缓存对外别名
@@ -133,9 +150,9 @@ Flickable {
         // 内置默认组件实现
         Component { id: _defaultText;               MarkNodeText {} }
         Component { id: _defaultLink;               MarkNodeLink {} }
-        Component { id: _defaultParagraph;          MarkRowNodeComponent {} }
+        Component { id: _defaultParagraph;          MarkRowNodeComponent { _isOuterContainer: true } }
         Component { id: _defaultHeading;            MarkNodeHeading {} }
-        Component { id: _defaultList;               MarkColumnNodeComponent {} }
+        Component { id: _defaultList;               MarkColumnNodeComponent { _isOuterContainer: true } }
         Component { id: _defaultItem;               MarkNodeItem {} }
         Component { id: _defaultCodeBlock;          MarkNodeCodeBlock {} }
         Component { id: _defaultCode;               MarkNodeCode {} }
@@ -155,8 +172,8 @@ Flickable {
         Component { id: _defaultSoftbreak;          MarkNodeSoftbreak {} }
         Component { id: _defaultLinebreak;          MarkNodeLinebreak {} }
         Component { id: _defaultUnknown;            MarkNodeUnknown {} }
-        Component { id: _defaultTableHeader;        MarkRowNodeComponent {} }
-        Component { id: _defaultTableRow;           MarkRowNodeComponent {} }
+        Component { id: _defaultTableHeader;        MarkRowNodeComponent { _isOuterContainer: true } }
+        Component { id: _defaultTableRow;           MarkRowNodeComponent { _isOuterContainer: true } }
     }
 
     // -----------------------------------------------------------------------
@@ -226,12 +243,6 @@ Flickable {
             }
             tree = _mark.parseFile(path)
         }
-    }
-
-    // headingNode 信号发射时，若配置了 outline，自动注册
-    onHeadingNode: (node, item) => {
-        if (root.outline && root.outline.registerHeading !== undefined)
-            root.outline.registerHeading(node, item);
     }
 
     // treeReady 信号发射时，若配置了 outline，自动重建

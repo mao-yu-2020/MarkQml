@@ -10,7 +10,7 @@
 
 - 🚀 **纯 QML 渲染** — 无需内嵌浏览器，性能更高、内存占用更低
 - 📑 **大纲预览** — 自动提取 Markdown heading 层级，生成可点击目录树，点击后自动滚动定位到对应标题
-- 🖼️ **图片点击放大** — 点击文档中的图片发出 `clickedImage(url)` 信号，由外部实现全屏放大预览
+- 🖼️ **按节点回调** — 每种 AST 节点类型都暴露 `<type>NodeCallback`，组件渲染完成时把 QML Item 传给外部，可挂载点击交互、二次定制等
 - 🎨 **四种内置主题** — 亮色 / 暗色 / 冷色 / 暖色，一键切换，绑定驱动实时生效
 - 📐 **AST 驱动组件化架构** — 每个 Markdown 节点对应独立 QML 组件，易于扩展
 - 🔗 **GFM 扩展支持** — 表格、删除线、任务列表、自动链接等
@@ -342,7 +342,7 @@ renderMark.tree = renderMark.parser.parseFile("/path/to/file.md")
 
 ### 大纲预览
 
-将 `MarkOutline` 绑定到 `RenderMark` 的 `outline` 属性，即可自动提取并渲染文档目录：
+通过 `outline` 属性 + `headingNodeCallback` 配合即可实现自动大纲：
 
 ```qml
 import RenderMark
@@ -351,7 +351,12 @@ RenderMark {
     id: renderMark
     anchors.fill: parent
     markdown: "# 标题一\n\n## 标题二\n\n正文内容"
-    outline: outlineView   // 绑定大纲组件，自动注册 heading
+    outline: outlineView   // tree 重建时自动调用 outlineView.rebuild()
+
+    // heading 渲染完成时手动注册到大纲
+    headingNodeCallback: (item) => {
+        outlineView.registerHeading(item.astNode, item)
+    }
 }
 
 MarkOutline {
@@ -367,55 +372,39 @@ MarkOutline {
 ```
 
 **说明**：
-- `MarkOutline` 内部通过 `registerHeading` 逐条收集 heading 节点，无需手动传入 AST。
-- 点击目录项时发出 `headingClicked(node, item)` 信号，`item` 为对应标题的 QML 元素，可直接用于滚动定位。
-- `RenderMark.scrollToHeading(item)` 会将视图滚动到该标题所在位置（顶部保留 20px 边距）。
+- `outline` 属性仅负责在 `treeReady` 时调 `outline.rebuild()` 清空旧数据；heading 的实际注册由 `headingNodeCallback` 完成。
+- `MarkOutline.registerHeading(node, item)` 把一条 heading 加入大纲；`item` 是该 heading 的 QML 渲染实例。
+- 点击目录项时发出 `headingClicked(node, item)` 信号，`item` 可直接传给 `RenderMark.scrollToHeading(item)` 滚动定位。
+- 滚动时保留 20px 顶部边距。
 
-### 图片点击放大
+### 外部事件回调（节点渲染完成）
 
-`RenderMark` 在内部图片被点击时会发出 `clickedImage(url)` 信号，参数为解析后的完整图片 URL。外部可据此实现放大预览：
+每种节点类型都暴露一个 `<type>NodeCallback` 属性，组件在 `Component.onCompleted` 之后会自动调用（如果用户配置了），并把渲染出的 QML Item 作为参数传入：
 
 ```qml
 RenderMark {
     anchors.fill: parent
-    markdown: "![示例](./image.png)"
+    markdown: "..."
 
-    onClickedImage: (url) => {
-        imageOverlay.source = url;
-        imageOverlay.visible = true;
-    }
-}
-
-// 放大预览遮罩（铺满父组件，点击关闭）
-Rectangle {
-    id: imageOverlay
-    property alias source: previewImage.source
-    anchors.fill: parent
-    visible: false
-    color: "#cc000000"
-    z: 100
-
-    Image {
-        id: previewImage
-        anchors.fill: parent
-        anchors.margins: 32
-        fillMode: Image.PreserveAspectFit
-        smooth: true
+    headingNodeCallback: (item) => {
+        // item.astNode 是 MarkNode；item.astStyle 是样式对象
+        console.log("heading", item.astNode.level, item.astNode.plainText())
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            imageOverlay.visible = false;
-            previewImage.source = "";
-        }
+    imageNodeCallback: (item) => {
+        // 由外部决定要不要给图片挂监听、加 MouseArea 等交互
     }
 }
 ```
 
+可用的回调（与 26 个节点类型一一对应）：
+
+`documentNodeCallback`、`paragraphNodeCallback`、`headingNodeCallback`、`textNodeCallback`、`linkNodeCallback`、`imageNodeCallback`、`listNodeCallback`、`itemNodeCallback`、`codeBlockNodeCallback`、`codeNodeCallback`、`blockQuoteNodeCallback`、`thematicBreakNodeCallback`、`tableNodeCallback`、`tableHeaderNodeCallback`、`tableRowNodeCallback`、`tableCellNodeCallback`、`strongNodeCallback`、`emphasisNodeCallback`、`strikethroughNodeCallback`、`htmlBlockNodeCallback`、`htmlInlineNodeCallback`、`footnoteDefinitionNodeCallback`、`footnoteReferenceNodeCallback`、`softbreakNodeCallback`、`linebreakNodeCallback`、`unknownNodeCallback`
+
 **说明**：
-- 只有成功加载的图片才会响应点击（加载失败时显示占位提示，不可点击）。
-- 鼠标悬停在可点击的图片上时会变为手型光标。
+- 默认全部为 `null`，未配置则跳过。
+- 调用时机为 `Component.onCompleted` 后的下一帧（`Qt.callLater`），保证 `astNode` / `astStyle` / `renderMark` 已就绪。
+- 回调中可访问 `item.astNode`（MarkNode）与 `item.astStyle`（样式对象）。
 
 ### 读取内置解析器
 

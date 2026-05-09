@@ -125,9 +125,9 @@ Window {
                 markdown: mainWindow.markdownText
                 outline: outlineView
 
-                onClickedImage: (url) => {
-                    imageOverlay.source = url;
-                    imageOverlay.visible = true;
+                // heading 渲染完成时手动注册到大纲组件
+                headingNodeCallback: (item) => {
+                    outlineView.registerHeading(item.astNode, item)
                 }
             }
 
@@ -142,33 +142,6 @@ Window {
                 opacity: 0.5
                 onHeadingClicked: (node, item) => {
                     if (item) renderMark.scrollToHeading(item);
-                }
-            }
-
-            // 图片放大预览遮罩
-            Rectangle {
-                id: imageOverlay
-                property alias source: previewImage.source
-
-                anchors.fill: parent
-                visible: false
-                color: "#cc000000"
-                z: 100
-
-                Image {
-                    id: previewImage
-                    anchors.fill: parent
-                    anchors.margins: 32
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        imageOverlay.visible = false;
-                        previewImage.source = "";
-                    }
                 }
             }
         }

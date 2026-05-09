@@ -21,6 +21,15 @@ Row {
         astStyle = style;
     }
 
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.strikethroughNodeCallback === "function") {
+                root.renderMark.strikethroughNodeCallback(root);
+            }
+        });
+    }
+
     spacing: 0
 
     MarkRowNodeComponent {

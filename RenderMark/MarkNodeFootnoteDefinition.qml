@@ -20,6 +20,15 @@ Row {
         astStyle = style;
     }
 
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.footnoteDefinitionNodeCallback === "function") {
+                root.renderMark.footnoteDefinitionNodeCallback(root);
+            }
+        });
+    }
+
     spacing: 4
 
     Text {

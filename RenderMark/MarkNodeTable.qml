@@ -21,6 +21,15 @@ GridLayout {
         astStyle = style;
     }
 
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.tableNodeCallback === "function") {
+                root.renderMark.tableNodeCallback(root);
+            }
+        });
+    }
+
     columns: root.astNode ? root.astNode.columns : 1
     rowSpacing: 0
     columnSpacing: 0

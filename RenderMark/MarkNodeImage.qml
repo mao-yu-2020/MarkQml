@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 
 /**
  * @brief 图片（image）渲染组件
@@ -9,6 +8,9 @@ import QtQuick.Controls
  * 加载并显示图片，限制最大宽度为 600px。
  * 本地路径自动补全 file:/// 前缀。
  * 加载失败时显示占位提示。
+ *
+ * 渲染完成时调用 renderMark.imageNodeCallback(this)，
+ * 由外部决定是否挂载点击放大、长按菜单等交互。
  */
 Item {
     id: root
@@ -70,17 +72,6 @@ Item {
                 console.log("Failed to load image:", root.astNode.url);
             }
         }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: image.status === Image.Ready
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                if (root.renderMark) {
-                    root.renderMark.clickedImage(image.source);
-                }
-            }
-        }
     }
 
     Rectangle {
@@ -132,5 +123,14 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
             }
         }
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.imageNodeCallback === "function") {
+                root.renderMark.imageNodeCallback(root);
+            }
+        });
     }
 }

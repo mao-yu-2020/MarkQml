@@ -12,10 +12,20 @@ Item {
 
     property var astNode: null
     property var astStyle: null
+    property var renderMark: null
 
     function init(node, style) {
         astNode = node;
         astStyle = style;
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.linebreakNodeCallback === "function") {
+                root.renderMark.linebreakNodeCallback(root);
+            }
+        });
     }
 
     width: 0

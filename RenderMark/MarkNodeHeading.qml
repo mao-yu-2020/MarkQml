@@ -32,11 +32,13 @@ Item {
     }
 
     Component.onCompleted: {
-        // 延迟到 MarkNodeComponent.onLoaded 赋值完成后再发射，
-        // 确保 renderMark 引用已就绪。
+        // 延迟到 MarkNodeComponent.onLoaded 赋值完成后再触发，
+        // 确保 renderMark / astNode 已就绪。
         Qt.callLater(function () {
-            if (root.renderMark && root.astNode)
-                root.renderMark.headingNode(root.astNode, root);
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.headingNodeCallback === "function") {
+                root.renderMark.headingNodeCallback(root);
+            }
         });
     }
 }

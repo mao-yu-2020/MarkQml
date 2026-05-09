@@ -21,6 +21,15 @@ Row {
         astStyle = style;
     }
 
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.itemNodeCallback === "function") {
+                root.renderMark.itemNodeCallback(root);
+            }
+        });
+    }
+
     spacing: 8
 
     // 计算当前 item 在父 list 中的索引，用于有序列表序号

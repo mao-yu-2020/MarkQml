@@ -21,6 +21,15 @@ Row {
         astStyle = style;
     }
 
+    Component.onCompleted: {
+        Qt.callLater(function () {
+            if (root.renderMark && root.astNode
+                && typeof root.renderMark.emphasisNodeCallback === "function") {
+                root.renderMark.emphasisNodeCallback(root);
+            }
+        });
+    }
+
     spacing: 0
 
     MarkRowNodeComponent {
