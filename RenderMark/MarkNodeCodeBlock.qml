@@ -19,15 +19,6 @@ Rectangle {
         astStyle = style;
     }
 
-    Component.onCompleted: {
-        Qt.callLater(function () {
-            if (root.renderMark && root.astNode
-                && typeof root.renderMark.codeBlockNodeCallback === "function") {
-                root.renderMark.codeBlockNodeCallback(root);
-            }
-        });
-    }
-
     Binding on color {
         value: root.astStyle.codeBackground
         when: root.astStyle !== null

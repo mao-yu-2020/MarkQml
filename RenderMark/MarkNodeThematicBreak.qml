@@ -19,15 +19,6 @@ Rectangle {
         astStyle = style;
     }
 
-    Component.onCompleted: {
-        Qt.callLater(function () {
-            if (root.renderMark && root.astNode
-                && typeof root.renderMark.thematicBreakNodeCallback === "function") {
-                root.renderMark.thematicBreakNodeCallback(root);
-            }
-        });
-    }
-
     Binding on color {
         value: root.astStyle.blockQuoteBorder
         when: root.astStyle !== null

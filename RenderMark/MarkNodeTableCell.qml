@@ -23,15 +23,6 @@ Rectangle {
         astStyle = style;
     }
 
-    Component.onCompleted: {
-        Qt.callLater(function () {
-            if (root.renderMark && root.astNode
-                && typeof root.renderMark.tableCellNodeCallback === "function") {
-                root.renderMark.tableCellNodeCallback(root);
-            }
-        });
-    }
-
     Layout.fillWidth: true
     implicitWidth: cellContent.implicitWidth + 16
     implicitHeight: cellContent.implicitHeight + 16

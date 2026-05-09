@@ -342,7 +342,7 @@ renderMark.tree = renderMark.parser.parseFile("/path/to/file.md")
 
 ### Outline Preview
 
-Use the `outline` property together with `headingNodeCallback` to get an automatic table of contents:
+`RenderMark` no longer wires outline integration internally; build it yourself with `onTreeReady` + `headingNodeCallback`:
 
 ```qml
 import RenderMark
@@ -351,7 +351,9 @@ RenderMark {
     id: renderMark
     anchors.fill: parent
     markdown: "# Heading 1\n\n## Heading 2\n\nBody text"
-    outline: outlineView   // outlineView.rebuild() is called whenever the tree is rebuilt
+
+    // Clear the outline whenever the tree is rebuilt
+    onTreeReady: outlineView.rebuild()
 
     // Register each heading into the outline when it finishes rendering
     headingNodeCallback: (item) => {
@@ -372,9 +374,9 @@ MarkOutline {
 ```
 
 **Notes**:
-- The `outline` property only triggers `outline.rebuild()` on `treeReady` (clearing stale data); the actual heading registration is performed by `headingNodeCallback`.
-- `MarkOutline.registerHeading(node, item)` adds one heading entry; `item` is the QML render instance of that heading.
-- Clicking an outline entry emits `headingClicked(node, item)`; pass `item` directly to `RenderMark.scrollToHeading(item)` to scroll into view.
+- `treeReady` is emitted whenever `tree` changes; connecting it to `outlineView.rebuild()` clears stale heading entries.
+- `headingNodeCallback(item)` fires when each heading component finishes rendering and hands you the QML instance (with `astNode` / `astStyle` etc.).
+- `MarkOutline.registerHeading(node, item)` adds one heading entry; `MarkOutline.headingClicked(node, item)` hands the clicked QML item back so you can pass it to `RenderMark.scrollToHeading(item)`.
 - Scrolling preserves a 20px top margin.
 
 ### Per-Node Callbacks (Render Completion)
@@ -399,7 +401,34 @@ RenderMark {
 
 Available callbacks (one per AST node type, 26 total):
 
-`documentNodeCallback`, `paragraphNodeCallback`, `headingNodeCallback`, `textNodeCallback`, `linkNodeCallback`, `imageNodeCallback`, `listNodeCallback`, `itemNodeCallback`, `codeBlockNodeCallback`, `codeNodeCallback`, `blockQuoteNodeCallback`, `thematicBreakNodeCallback`, `tableNodeCallback`, `tableHeaderNodeCallback`, `tableRowNodeCallback`, `tableCellNodeCallback`, `strongNodeCallback`, `emphasisNodeCallback`, `strikethroughNodeCallback`, `htmlBlockNodeCallback`, `htmlInlineNodeCallback`, `footnoteDefinitionNodeCallback`, `footnoteReferenceNodeCallback`, `softbreakNodeCallback`, `linebreakNodeCallback`, `unknownNodeCallback`
+| Node type | Callback property |
+|---|---|
+| `document` | `documentNodeCallback` |
+| `paragraph` | `paragraphNodeCallback` |
+| `heading` | `headingNodeCallback` |
+| `text` | `textNodeCallback` |
+| `link` | `linkNodeCallback` |
+| `image` | `imageNodeCallback` |
+| `list` | `listNodeCallback` |
+| `item` | `itemNodeCallback` |
+| `code_block` | `codeBlockNodeCallback` |
+| `code` | `codeNodeCallback` |
+| `block_quote` | `blockQuoteNodeCallback` |
+| `thematic_break` | `thematicBreakNodeCallback` |
+| `table` | `tableNodeCallback` |
+| `table_header` | `tableHeaderNodeCallback` |
+| `table_row` | `tableRowNodeCallback` |
+| `table_cell` | `tableCellNodeCallback` |
+| `strong` | `strongNodeCallback` |
+| `emphasis` | `emphasisNodeCallback` |
+| `strikethrough` | `strikethroughNodeCallback` |
+| `html_block` | `htmlBlockNodeCallback` |
+| `html_inline` | `htmlInlineNodeCallback` |
+| `footnote_definition` | `footnoteDefinitionNodeCallback` |
+| `footnote_reference` | `footnoteReferenceNodeCallback` |
+| `softbreak` | `softbreakNodeCallback` |
+| `linebreak` | `linebreakNodeCallback` |
+| `unknown` | `unknownNodeCallback` |
 
 **Notes**:
 - All callbacks default to `null`; unassigned ones are skipped.

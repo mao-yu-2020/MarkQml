@@ -5,6 +5,8 @@ import QtQuick
  *
  * 根据 astNode 的类型，从组件缓存中选择对应的 Component，
  * 通过 sourceComponent 动态加载，避免重复解析 QML 文件。
+ *
+ * 加载完成后会统一派发节点级回调 `<type>NodeCallback`，叶子组件无需自行处理。
  */
 Loader {
     id: root
@@ -13,6 +15,46 @@ Loader {
     property var astStyle: null
     property var cache: null
     property var renderMark: null
+
+    /** AST type 字符串 → RenderMark 上回调属性名的映射（缺省走 unknownNodeCallback） */
+    readonly property var _typeToCallback: ({
+        "document":            "documentNodeCallback",
+        "paragraph":           "paragraphNodeCallback",
+        "heading":             "headingNodeCallback",
+        "text":                "textNodeCallback",
+        "link":                "linkNodeCallback",
+        "image":               "imageNodeCallback",
+        "list":                "listNodeCallback",
+        "item":                "itemNodeCallback",
+        "code_block":          "codeBlockNodeCallback",
+        "code":                "codeNodeCallback",
+        "block_quote":         "blockQuoteNodeCallback",
+        "thematic_break":      "thematicBreakNodeCallback",
+        "table":               "tableNodeCallback",
+        "table_header":        "tableHeaderNodeCallback",
+        "table_row":           "tableRowNodeCallback",
+        "table_cell":          "tableCellNodeCallback",
+        "strong":              "strongNodeCallback",
+        "emphasis":            "emphasisNodeCallback",
+        "strikethrough":       "strikethroughNodeCallback",
+        "html_block":          "htmlBlockNodeCallback",
+        "html_inline":         "htmlInlineNodeCallback",
+        "footnote_definition": "footnoteDefinitionNodeCallback",
+        "footnote_reference":  "footnoteReferenceNodeCallback",
+        "softbreak":           "softbreakNodeCallback",
+        "linebreak":           "linebreakNodeCallback"
+    })
+
+    /**
+     * 统一派发节点渲染完成回调。
+     * 由 onLoaded 通过 Qt.callLater 调度，保证 item / astNode / renderMark 已就绪。
+     */
+    function _dispatchCallback() {
+        if (!root.renderMark || !root.astNode || !item) return;
+        var key = root._typeToCallback[root.astNode.type] || "unknownNodeCallback";
+        var cb = root.renderMark[key];
+        if (typeof cb === "function") cb(item);
+    }
 
     sourceComponent: {
         var node = astNode;
@@ -61,6 +103,9 @@ Loader {
         if (item && item.cache !== undefined) {
             item.cache = root.cache;
         }
+
+        // 统一派发节点级回调
+        Qt.callLater(_dispatchCallback);
     }
 
     onAstNodeChanged: {

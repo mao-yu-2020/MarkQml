@@ -57,12 +57,9 @@ Flickable {
      * @param tree 当前渲染的 MarkTree 实例（可能为 null）
      *
      * 当 tree 被赋值并开始重新渲染后发出，
-     * 外部使用者可连接此信号来清空旧状态、重建大纲数据等。
+     * 外部使用者可连接此信号来清空大纲、清除外部缓存等。
      */
     signal treeReady(var tree)
-
-    /** @brief 关联的大纲组件，若配置则在 treeReady 时自动 rebuild */
-    property var outline: null
 
     // -----------------------------------------------------------------------
     // 节点渲染完成回调（按节点类型暴露，外部赋值后由对应组件在渲染完成时调用）
@@ -150,9 +147,9 @@ Flickable {
         // 内置默认组件实现
         Component { id: _defaultText;               MarkNodeText {} }
         Component { id: _defaultLink;               MarkNodeLink {} }
-        Component { id: _defaultParagraph;          MarkRowNodeComponent { _isOuterContainer: true } }
+        Component { id: _defaultParagraph;          MarkRowNodeComponent {} }
         Component { id: _defaultHeading;            MarkNodeHeading {} }
-        Component { id: _defaultList;               MarkColumnNodeComponent { _isOuterContainer: true } }
+        Component { id: _defaultList;               MarkColumnNodeComponent {} }
         Component { id: _defaultItem;               MarkNodeItem {} }
         Component { id: _defaultCodeBlock;          MarkNodeCodeBlock {} }
         Component { id: _defaultCode;               MarkNodeCode {} }
@@ -172,8 +169,8 @@ Flickable {
         Component { id: _defaultSoftbreak;          MarkNodeSoftbreak {} }
         Component { id: _defaultLinebreak;          MarkNodeLinebreak {} }
         Component { id: _defaultUnknown;            MarkNodeUnknown {} }
-        Component { id: _defaultTableHeader;        MarkRowNodeComponent { _isOuterContainer: true } }
-        Component { id: _defaultTableRow;           MarkRowNodeComponent { _isOuterContainer: true } }
+        Component { id: _defaultTableHeader;        MarkRowNodeComponent {} }
+        Component { id: _defaultTableRow;           MarkRowNodeComponent {} }
     }
 
     // -----------------------------------------------------------------------
@@ -243,12 +240,6 @@ Flickable {
             }
             tree = _mark.parseFile(path)
         }
-    }
-
-    // treeReady 信号发射时，若配置了 outline，自动重建
-    onTreeReady: () => {
-        if (root.outline && root.outline.rebuild !== undefined)
-            root.outline.rebuild();
     }
 
     // tree 变化时发出 treeReady 信号，通知外部重新渲染已开始

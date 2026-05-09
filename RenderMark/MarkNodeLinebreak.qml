@@ -19,15 +19,6 @@ Item {
         astStyle = style;
     }
 
-    Component.onCompleted: {
-        Qt.callLater(function () {
-            if (root.renderMark && root.astNode
-                && typeof root.renderMark.linebreakNodeCallback === "function") {
-                root.renderMark.linebreakNodeCallback(root);
-            }
-        });
-    }
-
     width: 0
     height: 0
 }

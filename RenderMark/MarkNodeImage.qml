@@ -8,9 +8,6 @@ import QtQuick
  * 加载并显示图片，限制最大宽度为 600px。
  * 本地路径自动补全 file:/// 前缀。
  * 加载失败时显示占位提示。
- *
- * 渲染完成时调用 renderMark.imageNodeCallback(this)，
- * 由外部决定是否挂载点击放大、长按菜单等交互。
  */
 Item {
     id: root
@@ -123,14 +120,5 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
             }
         }
-    }
-
-    Component.onCompleted: {
-        Qt.callLater(function () {
-            if (root.renderMark && root.astNode
-                && typeof root.renderMark.imageNodeCallback === "function") {
-                root.renderMark.imageNodeCallback(root);
-            }
-        });
     }
 }

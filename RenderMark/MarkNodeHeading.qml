@@ -30,15 +30,4 @@ Item {
         cache: root.cache
         renderMark: root.renderMark
     }
-
-    Component.onCompleted: {
-        // 延迟到 MarkNodeComponent.onLoaded 赋值完成后再触发，
-        // 确保 renderMark / astNode 已就绪。
-        Qt.callLater(function () {
-            if (root.renderMark && root.astNode
-                && typeof root.renderMark.headingNodeCallback === "function") {
-                root.renderMark.headingNodeCallback(root);
-            }
-        });
-    }
 }

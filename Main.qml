@@ -123,7 +123,9 @@ Window {
                 anchors.fill: parent
                 anchors.margins: 16
                 markdown: mainWindow.markdownText
-                outline: outlineView
+
+                // tree 重新渲染时清空大纲
+                onTreeReady: outlineView.rebuild()
 
                 // heading 渲染完成时手动注册到大纲组件
                 headingNodeCallback: (item) => {

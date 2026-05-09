@@ -19,15 +19,6 @@ Text {
         astStyle = style;
     }
 
-    Component.onCompleted: {
-        Qt.callLater(function () {
-            if (root.renderMark && root.astNode
-                && typeof root.renderMark.footnoteReferenceNodeCallback === "function") {
-                root.renderMark.footnoteReferenceNodeCallback(root);
-            }
-        });
-    }
-
     Binding on text {
         value: root.astNode ? "[" + root.astNode.content + "]" : ""
         when: root.astNode !== null
