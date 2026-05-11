@@ -343,6 +343,7 @@ RenderMark/
 │   │   └── RenderMarkConfigVersion.cmake
 │   └── qml/RenderMark/               # QML module
 │       ├── qmldir
+│       ├── RenderMark.qmltypes       # QML type info
 │       └── ... (QML files)
 ```
 
@@ -367,6 +368,9 @@ list(APPEND CMAKE_PREFIX_PATH "D:/temp/RenderMark")
 ```cmake
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(RenderMark CONFIG REQUIRED)  # Automatically finds RenderMarkConfig.cmake
+
+# Provide the QML import path for Qt Creator's QML Language Server
+set(QML_IMPORT_PATH "${RenderMark_QML_IMPORT_PATH}" CACHE STRING "")
 
 qt_add_executable(MyApp main.cpp)
 qt_add_qml_module(MyApp

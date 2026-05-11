@@ -145,6 +145,11 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qmldir"
     DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
 )
 
+# 安装 .qmltypes 文件（QML Language Server 识别类型所需）
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/RenderMark.qmltypes"
+    DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+)
+
 # 生成静态插件导入文件，供外部项目自动编译以确保 QML 类型被注册
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/rendermark_plugin_import.cpp"
     "#include <QtPlugin>\n"
