@@ -3,8 +3,33 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(Qt6 COMPONENTS Quick)
-find_dependency(cmark-gfm CONFIG)
-find_dependency(cmark-gfm-extensions CONFIG)
+
+# 创建 bundled cmark-gfm IMPORTED 目标（库随 RenderMark 一起安装，无需外部 vcpkg）
+if(NOT TARGET cmark-gfm)
+    add_library(cmark-gfm STATIC IMPORTED)
+    if(ANDROID)
+        set_target_properties(cmark-gfm PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
+    else()
+        set_target_properties(cmark-gfm PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
+    endif()
+endif()
+
+if(NOT TARGET cmark-gfm-extensions)
+    add_library(cmark-gfm-extensions STATIC IMPORTED)
+    if(ANDROID)
+        set_target_properties(cmark-gfm-extensions PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
+    else()
+        set_target_properties(cmark-gfm-extensions PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
+    endif()
+endif()
 
 # 创建 RenderMarkplugin IMPORTED 目标（QML 静态插件）
 if(NOT TARGET RenderMarkplugin)
@@ -20,7 +45,7 @@ if(NOT TARGET RenderMark::RenderMark)
     set_target_properties(RenderMark::RenderMark PROPERTIES
         IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}RenderMark${CMAKE_STATIC_LIBRARY_SUFFIX}"
         INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/RenderMark"
-        INTERFACE_LINK_LIBRARIES "Qt6::Quick;@CMARK_GFM_TARGET@;@CMARK_GFM_EXTENSIONS_TARGET@;RenderMarkplugin"
+        INTERFACE_LINK_LIBRARIES "Qt6::Quick;cmark-gfm;cmark-gfm-extensions;RenderMarkplugin"
     )
 endif()
 

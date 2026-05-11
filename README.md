@@ -325,22 +325,28 @@ cmake --install <build-dir>
 ```
 RenderMark/
 ├── bin/
-│   └── appMarkQml.exe              # 主程序（可选）
+│   ├── appMarkQml.exe               # 主程序（可选）
+│   ├── cmark-gfm.dll                # cmark-gfm 运行时（Windows）
+│   └── cmark-gfm-extensions.dll     # cmark-gfm 扩展运行时（Windows）
 ├── include/RenderMark/
-│   ├── Mark.h                       # C++ 头文件
+│   ├── Mark.h                        # C++ 头文件
 │   ├── MarkNode.h
 │   ├── MarkTree.h
-│   └── rendermark_plugin_import.cpp # 静态插件自动注册
+│   └── rendermark_plugin_import.cpp  # 静态插件自动注册
 ├── lib/
-│   ├── RenderMark.lib               # 主静态库
-│   ├── RenderMarkplugin.lib         # QML 插件静态库
+│   ├── RenderMark.lib                # 主静态库
+│   ├── RenderMarkplugin.lib          # QML 插件静态库
+│   ├── cmark-gfm.lib                 # cmark-gfm 导入库（已打包）
+│   ├── cmark-gfm-extensions.lib      # cmark-gfm 扩展导入库（已打包）
 │   ├── cmake/RenderMark/
-│   │   ├── RenderMarkConfig.cmake   # CMake 包配置
+│   │   ├── RenderMarkConfig.cmake    # CMake 包配置
 │   │   └── RenderMarkConfigVersion.cmake
-│   └── qml/RenderMark/              # QML 模块
+│   └── qml/RenderMark/               # QML 模块
 │       ├── qmldir
 │       └── ... (QML 文件)
 ```
+
+> 注：cmark-gfm 的库文件已随 RenderMark 一起打包安装，外部项目**无需自行安装 cmark-gfm**。
 
 ### 在其他 CMake 项目中使用
 
@@ -348,6 +354,12 @@ RenderMark/
 
 ```bash
 cmake -B build -S . -DCMAKE_PREFIX_PATH="D:/temp/RenderMark"
+```
+
+或在 `CMakeLists.txt` 中直接设置：
+
+```cmake
+list(APPEND CMAKE_PREFIX_PATH "D:/temp/RenderMark")
 ```
 
 **2. CMakeLists.txt**
@@ -405,6 +417,11 @@ Window {
 ```
 
 > `RenderMark::RenderMark` 目标通过 `INTERFACE_LINK_LIBRARIES` 自动链接 `RenderMarkplugin`，并通过 `INTERFACE_SOURCES` 自动编译 `rendermark_plugin_import.cpp`，确保 QML 类型在应用启动时被正确注册。外部项目只需链接 `RenderMark::RenderMark` 即可。
+
+### 注意事项
+
+- **MSVC 运行时匹配**：RenderMark 及其依赖的 cmark-gfm 是静态库，必须与使用项目的 MSVC 运行时配置一致。若 RenderMark 用 `RelWithDebInfo`（`/MD`）构建，则使用它的项目也需用 `RelWithDebInfo` 或 `Release` 构建；混用 `Debug`（`/MDd`）会导致 `_ITERATOR_DEBUG_LEVEL` 链接错误。
+- **无需 vcpkg**：cmark-gfm 已随 RenderMark 一起打包，外部项目不需要 `vcpkg.json` 或 `CMAKE_TOOLCHAIN_FILE`。
 
 ---
 

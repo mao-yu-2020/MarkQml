@@ -325,22 +325,28 @@ Directory structure after installation:
 ```
 RenderMark/
 ├── bin/
-│   └── appMarkQml.exe              # Main executable (optional)
+│   ├── appMarkQml.exe               # Main executable (optional)
+│   ├── cmark-gfm.dll                # cmark-gfm runtime (Windows)
+│   └── cmark-gfm-extensions.dll     # cmark-gfm extensions runtime (Windows)
 ├── include/RenderMark/
-│   ├── Mark.h                       # C++ headers
+│   ├── Mark.h                        # C++ headers
 │   ├── MarkNode.h
 │   ├── MarkTree.h
-│   └── rendermark_plugin_import.cpp # Static plugin auto-registration
+│   └── rendermark_plugin_import.cpp  # Static plugin auto-registration
 ├── lib/
-│   ├── RenderMark.lib               # Main static library
-│   ├── RenderMarkplugin.lib         # QML plugin static library
+│   ├── RenderMark.lib                # Main static library
+│   ├── RenderMarkplugin.lib          # QML plugin static library
+│   ├── cmark-gfm.lib                 # cmark-gfm import library (bundled)
+│   ├── cmark-gfm-extensions.lib      # cmark-gfm extensions import library (bundled)
 │   ├── cmake/RenderMark/
-│   │   ├── RenderMarkConfig.cmake   # CMake package config
+│   │   ├── RenderMarkConfig.cmake    # CMake package config
 │   │   └── RenderMarkConfigVersion.cmake
-│   └── qml/RenderMark/              # QML module
+│   └── qml/RenderMark/               # QML module
 │       ├── qmldir
 │       └── ... (QML files)
 ```
+
+> Note: The cmark-gfm libraries are bundled with RenderMark, so external projects **do not need to install cmark-gfm separately**.
 
 ### Use in Another CMake Project
 
@@ -348,6 +354,12 @@ RenderMark/
 
 ```bash
 cmake -B build -S . -DCMAKE_PREFIX_PATH="D:/temp/RenderMark"
+```
+
+Or set it directly in `CMakeLists.txt`:
+
+```cmake
+list(APPEND CMAKE_PREFIX_PATH "D:/temp/RenderMark")
 ```
 
 **2. CMakeLists.txt**
@@ -405,6 +417,11 @@ Window {
 ```
 
 > The `RenderMark::RenderMark` target automatically links `RenderMarkplugin` through `INTERFACE_LINK_LIBRARIES`, and automatically compiles `rendermark_plugin_import.cpp` through `INTERFACE_SOURCES` to ensure QML types are correctly registered at application startup. External projects only need to link `RenderMark::RenderMark`.
+
+### Notes
+
+- **MSVC Runtime Matching**: RenderMark and its dependency cmark-gfm are static libraries and must match the consuming project's MSVC runtime configuration. If RenderMark is built with `RelWithDebInfo` (`/MD`), the consuming project must also be built with `RelWithDebInfo` or `Release`; mixing with `Debug` (`/MDd`) will cause `_ITERATOR_DEBUG_LEVEL` linker errors.
+- **No vcpkg required**: cmark-gfm is bundled with RenderMark, so external projects do not need a `vcpkg.json` or `CMAKE_TOOLCHAIN_FILE`.
 
 ---
 
