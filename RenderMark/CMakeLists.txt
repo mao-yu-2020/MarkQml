@@ -84,7 +84,7 @@ target_link_libraries(RenderMark
 include(GNUInstallDirs)
 
 # 安装静态库
-install(TARGETS RenderMark
+install(TARGETS RenderMark RenderMarkplugin
     EXPORT RenderMarkTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -100,6 +100,21 @@ install(FILES ${RENDERMARK_HEADERS}
 set(CMAKE_INSTALL_QMLDIR "${CMAKE_INSTALL_LIBDIR}/qml" CACHE PATH "QML import path")
 install(FILES ${RENDERMARK_QML_FILES}
     DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+)
+
+# 安装 qmldir 文件（QML 引擎识别模块所需）
+# qt_add_qml_module 会在构建目录生成 qmldir，位置为 ${CMAKE_CURRENT_BINARY_DIR}/qmldir
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qmldir"
+    DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+)
+
+# 生成静态插件导入文件，供外部项目自动编译以确保 QML 类型被注册
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/rendermark_plugin_import.cpp"
+    "#include <QtPlugin>\n"
+    "Q_IMPORT_PLUGIN(RenderMarkPlugin)\n"
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rendermark_plugin_import.cpp"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RenderMark
 )
 
 # 生成 CMake 包配置文件（手动定义 IMPORTED 目标，避免导出 QML 内部资源目标）
@@ -130,3 +145,4 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/RenderMarkConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/RenderMark
 )
+

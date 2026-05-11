@@ -306,6 +306,108 @@ cmake --build .
 
 ---
 
+## Installation & Export
+
+The RenderMark library supports installation to a system or custom directory via CMake `install`, and generates package config files so external projects can use it directly through `find_package(RenderMark)`.
+
+### Install to a Custom Directory
+
+```bash
+# Install to a custom directory (recommended)
+cmake --install <build-dir> --prefix D:/temp/RenderMark
+
+# Or install to the system default path (Unix)
+cmake --install <build-dir>
+```
+
+Directory structure after installation:
+
+```
+RenderMark/
+├── bin/
+│   └── appMarkQml.exe              # Main executable (optional)
+├── include/RenderMark/
+│   ├── Mark.h                       # C++ headers
+│   ├── MarkNode.h
+│   ├── MarkTree.h
+│   └── rendermark_plugin_import.cpp # Static plugin auto-registration
+├── lib/
+│   ├── RenderMark.lib               # Main static library
+│   ├── RenderMarkplugin.lib         # QML plugin static library
+│   ├── cmake/RenderMark/
+│   │   ├── RenderMarkConfig.cmake   # CMake package config
+│   │   └── RenderMarkConfigVersion.cmake
+│   └── qml/RenderMark/              # QML module
+│       ├── qmldir
+│       └── ... (QML files)
+```
+
+### Use in Another CMake Project
+
+**1. Specify the installation path**
+
+```bash
+cmake -B build -S . -DCMAKE_PREFIX_PATH="D:/temp/RenderMark"
+```
+
+**2. CMakeLists.txt**
+
+```cmake
+find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(RenderMark CONFIG REQUIRED)  # Automatically finds RenderMarkConfig.cmake
+
+qt_add_executable(MyApp main.cpp)
+qt_add_qml_module(MyApp
+    URI MyApp
+    QML_FILES Main.qml
+)
+
+target_link_libraries(MyApp PRIVATE
+    Qt6::Quick
+    RenderMark::RenderMark    # Automatically links RenderMark + RenderMarkplugin
+)
+```
+
+**3. C++ code**
+
+```cpp
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <Mark.h>
+
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+
+    // If you need to load QML from the filesystem (instead of built-in resources), add the import path
+    // engine.addImportPath("D:/temp/RenderMark/lib/qml");
+
+    engine.loadFromModule("MyApp", "Main");
+    return app.exec();
+}
+```
+
+**4. QML code**
+
+```qml
+import QtQuick
+import RenderMark 1.0
+
+Window {
+    width: 800; height: 600; visible: true
+
+    RenderMark {
+        anchors.fill: parent
+        markdown: "# Hello World"
+    }
+}
+```
+
+> The `RenderMark::RenderMark` target automatically links `RenderMarkplugin` through `INTERFACE_LINK_LIBRARIES`, and automatically compiles `rendermark_plugin_import.cpp` through `INTERFACE_SOURCES` to ensure QML types are correctly registered at application startup. External projects only need to link `RenderMark::RenderMark`.
+
+---
+
 ## Usage
 
 ### Basic Usage

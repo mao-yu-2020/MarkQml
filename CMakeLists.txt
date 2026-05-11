@@ -10,6 +10,8 @@ qt_standard_project_setup(REQUIRES 6.8)
 
 add_subdirectory(RenderMark)
 
+include(GNUInstallDirs)
+
 qt_add_executable(appMarkQml main.cpp)
 
 qt_add_qml_module(appMarkQml
@@ -25,3 +27,8 @@ set_target_properties(appMarkQml PROPERTIES
 )
 
 target_link_libraries(appMarkQml PRIVATE Qt6::Quick RenderMark)
+
+install(TARGETS appMarkQml
+    BUNDLE  DESTINATION .
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

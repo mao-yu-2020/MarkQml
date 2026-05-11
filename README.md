@@ -306,6 +306,108 @@ cmake --build .
 
 ---
 
+## 安装与导出
+
+RenderMark 库支持通过 CMake `install` 安装到系统或自定义目录，并生成包配置文件，使外部项目可以通过 `find_package(RenderMark)` 直接使用。
+
+### 安装到指定目录
+
+```bash
+# 安装到自定义目录（推荐）
+cmake --install <build-dir> --prefix D:/temp/RenderMark
+
+# 或安装到系统默认路径（Unix）
+cmake --install <build-dir>
+```
+
+安装后的目录结构：
+
+```
+RenderMark/
+├── bin/
+│   └── appMarkQml.exe              # 主程序（可选）
+├── include/RenderMark/
+│   ├── Mark.h                       # C++ 头文件
+│   ├── MarkNode.h
+│   ├── MarkTree.h
+│   └── rendermark_plugin_import.cpp # 静态插件自动注册
+├── lib/
+│   ├── RenderMark.lib               # 主静态库
+│   ├── RenderMarkplugin.lib         # QML 插件静态库
+│   ├── cmake/RenderMark/
+│   │   ├── RenderMarkConfig.cmake   # CMake 包配置
+│   │   └── RenderMarkConfigVersion.cmake
+│   └── qml/RenderMark/              # QML 模块
+│       ├── qmldir
+│       └── ... (QML 文件)
+```
+
+### 在其他 CMake 项目中使用
+
+**1. 指定安装路径**
+
+```bash
+cmake -B build -S . -DCMAKE_PREFIX_PATH="D:/temp/RenderMark"
+```
+
+**2. CMakeLists.txt**
+
+```cmake
+find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(RenderMark CONFIG REQUIRED)  # 自动查找 RenderMarkConfig.cmake
+
+qt_add_executable(MyApp main.cpp)
+qt_add_qml_module(MyApp
+    URI MyApp
+    QML_FILES Main.qml
+)
+
+target_link_libraries(MyApp PRIVATE
+    Qt6::Quick
+    RenderMark::RenderMark    # 自动链接 RenderMark + RenderMarkplugin
+)
+```
+
+**3. C++ 代码**
+
+```cpp
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <Mark.h>
+
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+
+    // 如需从文件系统加载 QML（而非内置资源），添加导入路径
+    // engine.addImportPath("D:/temp/RenderMark/lib/qml");
+
+    engine.loadFromModule("MyApp", "Main");
+    return app.exec();
+}
+```
+
+**4. QML 代码**
+
+```qml
+import QtQuick
+import RenderMark 1.0
+
+Window {
+    width: 800; height: 600; visible: true
+
+    RenderMark {
+        anchors.fill: parent
+        markdown: "# Hello World"
+    }
+}
+```
+
+> `RenderMark::RenderMark` 目标通过 `INTERFACE_LINK_LIBRARIES` 自动链接 `RenderMarkplugin`，并通过 `INTERFACE_SOURCES` 自动编译 `rendermark_plugin_import.cpp`，确保 QML 类型在应用启动时被正确注册。外部项目只需链接 `RenderMark::RenderMark` 即可。
+
+---
+
 ## 使用
 
 ### 基本用法
