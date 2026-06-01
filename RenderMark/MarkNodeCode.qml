@@ -20,13 +20,16 @@ Rectangle {
     }
 
     Binding on color {
-        value: root.astStyle.codeBackground
+        value: root.astStyle.codeStyle.background
         when: root.astStyle !== null
     }
-    radius: 3
+    Binding on radius {
+        value: root.astStyle ? root.astStyle.codeStyle.radius : 3
+        when: root.astStyle !== null
+    }
 
-    implicitWidth: textItem.implicitWidth + 12
-    implicitHeight: textItem.implicitHeight + 6
+    implicitWidth: textItem.implicitWidth + root.astStyle.codeStyle.hPadding * 2
+    implicitHeight: textItem.implicitHeight + root.astStyle.codeStyle.vPadding * 2
 
     Text {
         id: textItem
@@ -36,11 +39,11 @@ Rectangle {
             when: root.astNode !== null
         }
         Binding on color {
-            value: root.astStyle.textColor
+            value: root.astStyle.codeStyle.color
             when: root.astStyle !== null
         }
         Binding on font.pixelSize {
-            value: root.astStyle.baseFontSize
+            value: root.astStyle.codeStyle.fontSize
             when: root.astStyle !== null
         }
         font.family: "Consolas, Courier New, monospace"
