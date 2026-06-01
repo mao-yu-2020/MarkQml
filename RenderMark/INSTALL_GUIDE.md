@@ -7,12 +7,12 @@
 ## 一、整体目标
 
 Build（编译）阶段完成后，我们得到一堆文件：
-- `RenderMark.lib` —— 编译好的 C++ 静态库
-- `RenderMarkplugin.lib` —— QML 插件静态库
+- `RenderMark.dll` / `libRenderMark.so` —— 编译好的 C++ 动态库
+- `RenderMarkplugin.dll` / `libRenderMarkplugin.so` —— QML 动态插件
 - 一堆 `.obj`、`.qmlc` 等中间文件
 
 Install（安装）阶段要做的是：**把外部项目真正需要的东西，复制到一个干净的目录里**。外部项目只需要：
-1. 链接库文件（`.lib` / `.a`）
+1. 运行动态库文件（`.dll` / `.so` / `.dylib`）
 2. 包含头文件（`.h`）
 3. 识别 QML 模块（`qmldir` + `.qml` + `.qmltypes`）
 4. 找到 CMake 配置（`RenderMarkConfig.cmake`）
@@ -22,7 +22,23 @@ Install（安装）阶段要做的是：**把外部项目真正需要的东西�
 ## 二、第一部分：库是怎么定义出来的（构建阶段）
 
 ```cmake
-qt_add_library(RenderMark STATIC)                          # 创建一个叫 RenderMark 的静态库
+qt_add_library(RenderMark SHARED)                          # 创建一个叫 RenderMark 的动态库
+generate_export_header(RenderMark                           # 自动生成跨平台导出/导入宏头文件
+    BASE_NAME RENDERMARK
+    EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/rendermark_export.h"
+)
+
+target_include_directories(RenderMark
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:include/RenderMark>
+)
+
+if(NOT WIN32)
+    target_compile_options(RenderMark PRIVATE -fvisibility=hidden)
+endif()
+
 qt_add_qml_module(RenderMark                               # 给它附加一个 QML 模块
     URI RenderMark                                         # QML 中 import 时用的名字
     VERSION 1.0
@@ -38,6 +54,8 @@ qt_add_qml_module(RenderMark                               # 给它附加一个 
 - 自动生成插件类 `RenderMarkPlugin` 和 `plugin_init` 代码
 - 创建内部辅助目标：`RenderMarkplugin`、`RenderMarkplugin_init`、`RenderMark_resources_1` 等
 
+当 `RenderMark` 是 **SHARED**（动态库）时，`qt_add_qml_module` 会自动生成**动态 QML 插件**（`RenderMarkplugin.dll`），而非静态插件。这意味着 QML 引擎在运行时会自动加载插件，外部项目不需要 `Q_IMPORT_PLUGIN`。
+
 ```cmake
 target_link_libraries(RenderMark
     PUBLIC
@@ -50,7 +68,7 @@ target_link_libraries(RenderMark
 
 ---
 
-## 三、第二部分：安装规则详解（第 80~181 行）
+## 三、第二部分：安装规则详解
 
 ### 3.1 引入标准安装目录变量
 
@@ -68,25 +86,33 @@ include(GNUInstallDirs)
 - `bin` 对应 `D:/temp/RenderMark/bin`
 - `include` 对应 `D:/temp/RenderMark/include`
 
-### 3.2 安装静态库
+### 3.2 安装动态库（主库与 QML 插件分开）
 
 ```cmake
-install(TARGETS RenderMark RenderMarkplugin
+# 安装主共享库
+install(TARGETS RenderMark
     EXPORT RenderMarkTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}    # .lib / .a 文件放这里
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}    # .lib（Windows import lib）放这里
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}    # .so / .dylib 文件放这里
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}    # .dll / .exe 文件放这里
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}    # .dll 文件放这里
+)
+
+# 安装 QML 插件到 QML 导入路径（QML 引擎运行时加载需要）
+install(TARGETS RenderMarkplugin
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+    LIBRARY DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+    RUNTIME DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
 )
 ```
 
-**作用**：把构建出来的 `RenderMark.lib` 和 `RenderMarkplugin.lib` 复制到安装目录的 `lib/` 下。
-
-`EXPORT RenderMarkTargets` 是给 CMake 内部用的标记，表示"这俩目标属于 RenderMarkTargets 导出组"（虽然后面我们没有用 `install(EXPORT)` 来生成导出文件，而是用手动方式替代）。
+**作用**：
+- 主库 `RenderMark.dll`（Windows）或 `libRenderMark.so`（Linux）安装到 `bin/` 或 `lib/`
+- QML 插件 `RenderMarkplugin.dll` 安装到 `lib/qml/RenderMark/`，这样 QML 引擎在 `import RenderMark` 时能自动找到并加载它
 
 三个 `DESTINATION` 的区别：
-- `ARCHIVE` —— 静态库（Windows `.lib`，Linux `.a`）
-- `LIBRARY` —— 共享库（Linux `.so`，macOS `.dylib`）
-- `RUNTIME` —— 运行时（Windows `.dll`，可执行文件 `.exe`）
+- `ARCHIVE` —— 导入库（Windows `.lib`）
+- `LIBRARY` —— 共享库本体（Linux `.so`，macOS `.dylib`）
+- `RUNTIME` —— 运行时动态库（Windows `.dll`，可执行文件 `.exe`）
 
 ### 3.3 安装头文件
 
@@ -94,9 +120,14 @@ install(TARGETS RenderMark RenderMarkplugin
 install(FILES ${RENDERMARK_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RenderMark
 )
+
+# 安装自动生成的导出宏头文件
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rendermark_export.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RenderMark
+)
 ```
 
-**作用**：把 `Mark.h`、`MarkNode.h`、`MarkTree.h` 复制到 `include/RenderMark/` 下。
+**作用**：把 `Mark.h`、`MarkNode.h`、`MarkTree.h` 以及自动生成的 `rendermark_export.h` 复制到 `include/RenderMark/` 下。
 
 外部项目写 `#include <Mark.h>` 时，CMake 会通过 `INTERFACE_INCLUDE_DIRECTORIES` 告诉编译器去 `include/RenderMark/` 里找。
 
@@ -153,7 +184,7 @@ endif()
   - `.lib`（导入库，链接时用）→ 安装到 `lib/`
   - `.dll`（运行时库，执行时用）→ 安装到 `bin/`
 
-**为什么要打包 cmark-gfm？** 因为 RenderMark 是静态库，它把 cmark-gfm 的符号链接到了自己的 `.obj` 中。外部项目链接 RenderMark 时，编译器会看到这些符号，需要在链接阶段找到 cmark-gfm 的定义，所以外部项目也需要 cmark-gfm 的 `.lib` 文件。
+**为什么要打包 cmark-gfm？** 因为 RenderMark 是动态库，它在运行时需要加载 cmark-gfm。把 cmark-gfm 和 RenderMark 打包在一起，外部项目运行时不需要单独安装 cmark-gfm。
 
 ### 3.5 安装 QML 模块文件
 
@@ -178,25 +209,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/RenderMark.qmltypes"
 2. **`qmldir`** —— QML 模块的"身份证"，记录了模块名、版本、插件类名、类型信息等
 3. **`RenderMark.qmltypes`** —— QML 类型数据库，qmlls 靠它知道 `RenderMark` 有哪些属性、方法、信号
 
-安装后的路径：`lib/qml/RenderMark/`（包含 `qmldir` + `.qmltypes` + 所有 `.qml`）。
+安装后的路径：`lib/qml/RenderMark/`（包含 `qmldir` + `.qmltypes` + 所有 `.qml` + `RenderMarkplugin.dll`）。
 
-### 3.6 生成并安装静态插件导入文件
-
-```cmake
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/rendermark_plugin_import.cpp"
-    "#include <QtPlugin>\n"
-    "Q_IMPORT_PLUGIN(RenderMarkPlugin)\n"
-)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rendermark_plugin_import.cpp"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RenderMark
-)
-```
-
-**问题背景**：RenderMark 是静态库，它的 QML 插件也是静态的。Qt 的静态插件不会自动加载，需要 `Q_IMPORT_PLUGIN` 宏来注册。
-
-**解决方式**：我们生成一个只有两行的 `.cpp` 文件，里面写了 `Q_IMPORT_PLUGIN(RenderMarkPlugin)`。然后通过 `RenderMarkConfig.cmake` 的 `INTERFACE_SOURCES` 属性，让外部项目自动编译这个文件。这样外部项目不需要手动写 `Q_IMPORT_PLUGIN`。
-
-### 3.7 生成 CMake 包配置文件（核心：让 find_package 能工作）
+### 3.6 生成 CMake 包配置文件（核心：让 find_package 能工作）
 
 ```cmake
 include(CMakePackageConfigHelpers)
@@ -254,40 +269,61 @@ endif()
 ```
 
 **手动创建 IMPORTED 目标**。因为 cmark-gfm 的 `.lib` 文件被一起打包安装了，但外部项目没有它的 CMake 配置文件，所以我们直接在 RenderMark 的配置文件里"告诉"CMake：
-- 有一个叫 `cmark-gfm` 的静态库
+- 有一个叫 `cmark-gfm` 的库
 - 它的文件在 `${PACKAGE_PREFIX_DIR}/lib/cmark-gfm.lib`
 
-同理创建 `cmark-gfm-extensions` 和 `RenderMarkplugin`。
+同理创建 `cmark-gfm-extensions`。
+
+```cmake
+if(NOT TARGET RenderMarkplugin)
+    add_library(RenderMarkplugin SHARED IMPORTED)
+    if(WIN32)
+        set_target_properties(RenderMarkplugin PROPERTIES
+            IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/RenderMarkplugin.lib"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/qml/RenderMark/RenderMarkplugin.dll"
+        )
+    else()
+        set_target_properties(RenderMarkplugin PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/qml/RenderMark/libRenderMarkplugin.so"
+        )
+    endif()
+endif()
+```
+
+创建 `RenderMarkplugin` IMPORTED 目标。这是 QML 动态插件，外部项目**不需要链接它**——QML 引擎会在运行时自动从 `lib/qml/RenderMark/` 加载。但定义成 IMPORTED 目标有助于 CMake 追踪依赖完整性。
 
 ```cmake
 if(NOT TARGET RenderMark::RenderMark)
-    add_library(RenderMark::RenderMark STATIC IMPORTED)
+    add_library(RenderMark::RenderMark SHARED IMPORTED)
+    if(WIN32)
+        set_target_properties(RenderMark::RenderMark PROPERTIES
+            IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/RenderMark.lib"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/RenderMark.dll"
+        )
+    else()
+        set_target_properties(RenderMark::RenderMark PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/libRenderMark.so"
+        )
+    endif()
     set_target_properties(RenderMark::RenderMark PROPERTIES
-        IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/RenderMark.lib"
         INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/RenderMark"
-        INTERFACE_LINK_LIBRARIES "Qt6::Quick;cmark-gfm;cmark-gfm-extensions;RenderMarkplugin"
+        INTERFACE_LINK_LIBRARIES "Qt6::Quick;cmark-gfm;cmark-gfm-extensions"
     )
 endif()
 ```
 
 这是核心：**创建 `RenderMark::RenderMark` IMPORTED 目标**，包含三个关键属性：
-- `IMPORTED_LOCATION` —— 库文件在哪里
+- `IMPORTED_LOCATION` / `IMPORTED_IMPLIB` —— 库文件在哪里（Windows 需要分开指定 `.lib` 和 `.dll`）
 - `INTERFACE_INCLUDE_DIRECTORIES` —— 头文件在哪里（外部项目 `#include <Mark.h>` 时自动添加 `-I`）
-- `INTERFACE_LINK_LIBRARIES` —— 链接 RenderMark 时，自动链接 Qt6::Quick + cmark-gfm + cmark-gfm-extensions + RenderMarkplugin
+- `INTERFACE_LINK_LIBRARIES` —— 链接 RenderMark 时，自动链接 Qt6::Quick + cmark-gfm + cmark-gfm-extensions
 
-```cmake
-set_property(TARGET RenderMark::RenderMark APPEND PROPERTY
-    INTERFACE_SOURCES "${PACKAGE_PREFIX_DIR}/include/RenderMark/rendermark_plugin_import.cpp"
-)
-```
-
-**自动编译插件导入文件**。外部项目链接 `RenderMark::RenderMark` 时，CMake 会自动把 `rendermark_plugin_import.cpp` 加入编译列表，不需要用户手动处理 `Q_IMPORT_PLUGIN`。
+**注意**：`RenderMarkplugin` **不在** `INTERFACE_LINK_LIBRARIES` 中，因为外部项目不需要链接动态 QML 插件——它在运行时被 QML 引擎自动加载。
 
 ```cmake
 set(RenderMark_QML_IMPORT_PATH "${PACKAGE_PREFIX_DIR}/lib/qml")
 ```
 
-提供一个变量，外部项目可以设置 `QML_IMPORT_PATH` 让 qmlls 找到 QML 模块。
+提供一个变量，外部项目可以设置 `QML_IMPORT_PATH` 让 QML 引擎找到 QML 模块。
 
 ---
 
@@ -297,23 +333,27 @@ set(RenderMark_QML_IMPORT_PATH "${PACKAGE_PREFIX_DIR}/lib/qml")
 构建阶段 (Build)                              安装阶段 (Install)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-qt_add_library(RenderMark STATIC)              install(TARGETS RenderMark RenderMarkplugin)
-  ↓ 生成 RenderMark.lib                          ↓ 复制到 <prefix>/lib/
+qt_add_library(RenderMark SHARED)              install(TARGETS RenderMark)
+generate_export_header(RenderMark)               ↓ 复制到 <prefix>/lib/ 或 <prefix>/bin/
+  ↓ 生成 RenderMark.dll / .so / .dylib
+  ↓ 生成 rendermark_export.h
+
+target_include_directories(...)                install(TARGETS RenderMarkplugin)
+  ↓ 添加 include 路径                            ↓ 复制到 <prefix>/lib/qml/RenderMark/
+
 qt_add_qml_module(RenderMark ...)                
-  ↓ 生成 qmldir, RenderMark.qmltypes            install(FILES *.h)
-  ↓ 生成 RenderMarkplugin.lib                    ↓ 复制到 <prefix>/include/RenderMark/
+  ↓ 生成 qmldir, RenderMark.qmltypes            install(FILES *.h + rendermark_export.h)
+  ↓ 生成 RenderMarkplugin.dll / .so              ↓ 复制到 <prefix>/include/RenderMark/
   ↓ 生成 plugin_init 代码
                                                 install(FILES cmark-gfm.lib / .dll)
 链接 cmark-gfm (vcpkg)                           ↓ 复制到 <prefix>/lib/ 和 <prefix>/bin/
   ↓ 使用 vcpkg 安装的库
                                                 install(FILES *.qml, qmldir, *.qmltypes)
                                                 ↓ 复制到 <prefix>/lib/qml/RenderMark/
-                                                install(FILES rendermark_plugin_import.cpp)
-configure_package_config_file()                  ↓ 复制到 <prefix>/include/RenderMark/
-  ↓ 读取 .in 模板，替换路径
+
+configure_package_config_file()                 install(FILES RenderMarkConfig.cmake)
+  ↓ 读取 .in 模板，替换路径                       ↓ 复制到 <prefix>/lib/cmake/RenderMark/
   ↓ 生成 RenderMarkConfig.cmake
-                                                install(FILES RenderMarkConfig.cmake)
-                                                ↓ 复制到 <prefix>/lib/cmake/RenderMark/
 ```
 
 ---
@@ -326,30 +366,38 @@ configure_package_config_file()                  ↓ 复制到 <prefix>/include/
 D:/temp/RenderMark/
 ├── bin/
 │   ├── appMarkQml.exe               # 主程序（可选，根项目安装的）
+│   ├── RenderMark.dll               # RenderMark 主动态库（Windows）
 │   ├── cmark-gfm.dll                # cmark-gfm 运行时（Windows）
 │   └── cmark-gfm-extensions.dll     # cmark-gfm 扩展运行时（Windows）
 ├── include/RenderMark/
 │   ├── Mark.h                        # C++ 头文件
 │   ├── MarkNode.h
 │   ├── MarkTree.h
-│   └── rendermark_plugin_import.cpp  # 静态插件自动注册文件
+│   └── rendermark_export.h           # 自动生成的导出/导入宏头文件
 ├── lib/
-│   ├── RenderMark.lib                # 主静态库
-│   ├── RenderMarkplugin.lib          # QML 插件静态库
+│   ├── RenderMark.lib                # Windows import library（链接时用）
 │   ├── cmark-gfm.lib                 # cmark-gfm 导入库（已打包）
 │   ├── cmark-gfm-extensions.lib      # cmark-gfm 扩展导入库（已打包）
-│   └── cmake/RenderMark/
-│       ├── RenderMarkConfig.cmake    # CMake 包配置（find_package 用）
-│       └── RenderMarkConfigVersion.cmake
+│   ├── cmake/RenderMark/
+│   │   ├── RenderMarkConfig.cmake    # CMake 包配置（find_package 用）
+│   │   └── RenderMarkConfigVersion.cmake
 │   └── qml/RenderMark/               # QML 模块
 │       ├── qmldir                    # 模块描述
 │       ├── RenderMark.qmltypes       # 类型信息（qmlls 用）
+│       ├── RenderMarkplugin.dll      # QML 动态插件（运行时加载）
 │       └── ... (25 个 .qml 文件)
 ```
+
+**与静态库版本的关键区别**：
+- `RenderMark.dll` 在 `bin/`（Windows）或 `lib/`（Linux/macOS），而不是 `RenderMark.lib` 静态库
+- `RenderMarkplugin.dll` 在 `lib/qml/RenderMark/`（动态插件），而不是 `RenderMarkplugin.lib` 静态库
+- **没有** `rendermark_plugin_import.cpp` —— 动态插件由 QML 引擎自动加载，不需要手动 `Q_IMPORT_PLUGIN`
 
 ---
 
 ## 七、外部项目怎么使用
+
+### 7.1 CMake 配置
 
 ```cmake
 # 1. 告诉 CMake 去哪里找 RenderMark
@@ -369,7 +417,63 @@ target_link_libraries(MyApp PRIVATE Qt6::Quick RenderMark::RenderMark)
 ```
 
 外部项目只需要链接 `RenderMark::RenderMark`，以下内容全部自动完成：
-- 链接 `RenderMark.lib` + `RenderMarkplugin.lib`
+- 链接 `RenderMark.lib`（Windows import library）
 - 链接 `cmark-gfm.lib` + `cmark-gfm-extensions.lib`
 - 添加 `include/RenderMark` 到头文件搜索路径
-- 自动编译 `rendermark_plugin_import.cpp`（注册 QML 静态插件）
+
+### 7.2 C++ 代码中设置 QML 导入路径
+
+```cpp
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+
+    // 让 QML 引擎能找到 RenderMark 模块
+    engine.addImportPath("D:/temp/RenderMark/lib/qml");
+
+    engine.load(QUrl(QStringLiteral("qrc:/Main.qml")));
+    return app.exec();
+}
+```
+
+**注意**：动态 QML 插件需要在运行时由 QML 引擎加载，所以必须调用 `engine.addImportPath()` 指向 `lib/qml/` 目录。QML 引擎会自动在 `lib/qml/RenderMark/` 下找到 `qmldir` 和 `RenderMarkplugin.dll` 并加载。
+
+### 7.3 QML 中使用
+
+```qml
+import QtQuick
+import RenderMark  // 动态插件自动加载，无需 Q_IMPORT_PLUGIN
+
+Window {
+    width: 800; height: 600; visible: true
+
+    Mark {
+        id: parser
+    }
+
+    Component.onCompleted: {
+        let tree = parser.parse("# Hello\n\nThis is **bold**.")
+        console.log(tree.root.plainText())
+    }
+}
+```
+
+### 7.4 运行时部署注意事项
+
+由于 RenderMark 是动态库，外部项目发布时需要确保以下 DLL 在可执行文件同一目录或系统 PATH 中：
+
+**Windows：**
+- `RenderMark.dll`
+- `cmark-gfm.dll`
+- `cmark-gfm-extensions.dll`
+
+**Linux：**
+- `libRenderMark.so`
+- `libcmark-gfm.so`
+- `libcmark-gfm-extensions.so`
+
+同时确保 QML 导入路径目录（`lib/qml/RenderMark/`）存在且包含 `qmldir` 和 `RenderMarkplugin.dll`。
