@@ -47,7 +47,7 @@ Flickable {
         // -------------------------------------------------------------------
         // 全局回退
         // -------------------------------------------------------------------
-        property color textColor: "#2c3e50"
+        property color textColor: "#1a1a2e"
         property int   baseFontSize: root.baseFontSize
 
         // -------------------------------------------------------------------
@@ -59,7 +59,7 @@ Flickable {
         }
 
         property QtObject linkStyle: QtObject {
-            property color color: "#3498db"
+            property color color: "#2563eb"
             property int   fontSize: markStyle.baseFontSize
             property bool  underline: true
         }
@@ -67,7 +67,7 @@ Flickable {
         property QtObject codeStyle: QtObject {
             property color color: markStyle.textColor
             property int   fontSize: markStyle.baseFontSize
-            property color background: "#eaf2f8"
+            property color background: "#f1f5f9"
             property real  radius: 3
             property int   hPadding: 4
             property int   vPadding: 1
@@ -133,7 +133,7 @@ Flickable {
         property QtObject codeBlockStyle: QtObject {
             property color color: markStyle.textColor
             property int   fontSize: markStyle.baseFontSize
-            property color background: "#eaf2f8"
+            property color background: "#f8fafc"
             property color langLabelColor: markStyle.textColor
             property color langLabelBackground: Qt.rgba(0, 0, 0, 0.05)
             property real  radius: 4
@@ -145,8 +145,8 @@ Flickable {
         property QtObject blockQuoteStyle: QtObject {
             property color color: markStyle.textColor
             property int   fontSize: markStyle.baseFontSize
-            property color background: "#eaf2f8"
-            property color borderColor: "#bdc3c7"
+            property color background: "#f8fafc"
+            property color borderColor: "#3b82f6"
             property int   borderWidth: 4
             property real  radius: 4
             property int   leftPadding: 12
@@ -172,9 +172,9 @@ Flickable {
         }
 
         property QtObject tableStyle: QtObject {
-            property color borderColor: "#bdc3c7"
+            property color borderColor: "#e2e8f0"
             property int   borderWidth: 1
-            property color headerBg: "#d6eaf8"
+            property color headerBg: "#f8fafc"
             property color cellBg: "transparent"
             property int   cellPadding: 8
             property int   topMargin: 8
@@ -182,7 +182,7 @@ Flickable {
         }
 
         property QtObject thematicBreakStyle: QtObject {
-            property color color: "#bdc3c7"
+            property color color: "#e2e8f0"
             property int   height: 2
             property int   topMargin: 16
             property int   bottomMargin: 16
@@ -344,7 +344,7 @@ Flickable {
     // 主题切换函数
     // -----------------------------------------------------------------------
 
-    function setLightTheme() {
+    function setDaylightTheme() {
         markStyle.textColor = "#1a1a2e"
         markStyle.baseFontSize = 14
 
@@ -355,101 +355,155 @@ Flickable {
         markStyle.emphasisStyle.color = "#1a1a2e"
         markStyle.strikethroughStyle.color = "#1a1a2e"
         markStyle.imageStyle.placeholderBg = "#f1f5f9"
-        markStyle.imageStyle.placeholderBorderColor = "#cbd5e1"
+        markStyle.imageStyle.placeholderBorderColor = "#e2e8f0"
         markStyle.imageStyle.placeholderTextColor = "#1a1a2e"
 
         markStyle.paragraphStyle.color = "#1a1a2e"
-        markStyle.headingStyle.color = "#1a1a2e"
-        markStyle.codeBlockStyle.background = "#f1f5f9"
+        markStyle.headingStyle.color = "#111827"
+        markStyle.codeBlockStyle.background = "#f8fafc"
         markStyle.codeBlockStyle.color = "#1a1a2e"
-        markStyle.blockQuoteStyle.background = "#f1f5f9"
+        markStyle.blockQuoteStyle.background = "#f8fafc"
         markStyle.blockQuoteStyle.borderColor = "#3b82f6"
-        markStyle.tableStyle.borderColor = "#cbd5e1"
-        markStyle.tableStyle.headerBg = "#e2e8f0"
-        markStyle.thematicBreakStyle.color = "#cbd5e1"
+        markStyle.tableStyle.borderColor = "#e2e8f0"
+        markStyle.tableStyle.headerBg = "#f8fafc"
+        markStyle.thematicBreakStyle.color = "#e2e8f0"
 
         bgColor = "#ffffff"
     }
 
-    function setDarkTheme() {
-        markStyle.textColor = "#f1f5f9"
+    function setMidnightTheme() {
+        markStyle.textColor = "#c9d1d9"
         markStyle.baseFontSize = 14
 
-        markStyle.textStyle.color = "#f1f5f9"
-        markStyle.linkStyle.color = "#60a5fa"
-        markStyle.codeStyle.background = "#27272a"
-        markStyle.strongStyle.color = "#f1f5f9"
-        markStyle.emphasisStyle.color = "#f1f5f9"
-        markStyle.strikethroughStyle.color = "#f1f5f9"
-        markStyle.imageStyle.placeholderBg = "#27272a"
-        markStyle.imageStyle.placeholderBorderColor = "#52525b"
-        markStyle.imageStyle.placeholderTextColor = "#f1f5f9"
+        markStyle.textStyle.color = "#c9d1d9"
+        markStyle.linkStyle.color = "#58a6ff"
+        markStyle.codeStyle.background = "#161b22"
+        markStyle.strongStyle.color = "#e6edf3"
+        markStyle.emphasisStyle.color = "#c9d1d9"
+        markStyle.strikethroughStyle.color = "#8b949e"
+        markStyle.imageStyle.placeholderBg = "#161b22"
+        markStyle.imageStyle.placeholderBorderColor = "#30363d"
+        markStyle.imageStyle.placeholderTextColor = "#c9d1d9"
 
-        markStyle.paragraphStyle.color = "#f1f5f9"
-        markStyle.headingStyle.color = "#f1f5f9"
-        markStyle.codeBlockStyle.background = "#27272a"
-        markStyle.codeBlockStyle.color = "#f1f5f9"
-        markStyle.blockQuoteStyle.background = "#18181b"
-        markStyle.blockQuoteStyle.borderColor = "#a78bfa"
-        markStyle.tableStyle.borderColor = "#52525b"
-        markStyle.tableStyle.headerBg = "#18181b"
-        markStyle.thematicBreakStyle.color = "#52525b"
+        markStyle.paragraphStyle.color = "#c9d1d9"
+        markStyle.headingStyle.color = "#e6edf3"
+        markStyle.codeBlockStyle.background = "#161b22"
+        markStyle.codeBlockStyle.color = "#c9d1d9"
+        markStyle.blockQuoteStyle.background = "#161b22"
+        markStyle.blockQuoteStyle.borderColor = "#8b949e"
+        markStyle.tableStyle.borderColor = "#30363d"
+        markStyle.tableStyle.headerBg = "#161b22"
+        markStyle.thematicBreakStyle.color = "#30363d"
 
-        bgColor = "#0a0a0f"
+        bgColor = "#0d1117"
     }
 
-    function setColdTheme() {
+    function setGlacierTheme() {
         markStyle.textColor = "#0c4a6e"
         markStyle.baseFontSize = 14
 
         markStyle.textStyle.color = "#0c4a6e"
-        markStyle.linkStyle.color = "#0891b2"
-        markStyle.codeStyle.background = "#ecfeff"
-        markStyle.strongStyle.color = "#0c4a6e"
+        markStyle.linkStyle.color = "#0284c7"
+        markStyle.codeStyle.background = "#e0f2fe"
+        markStyle.strongStyle.color = "#075985"
         markStyle.emphasisStyle.color = "#0c4a6e"
-        markStyle.strikethroughStyle.color = "#0c4a6e"
-        markStyle.imageStyle.placeholderBg = "#ecfeff"
-        markStyle.imageStyle.placeholderBorderColor = "#7dd3fc"
+        markStyle.strikethroughStyle.color = "#64748b"
+        markStyle.imageStyle.placeholderBg = "#e0f2fe"
+        markStyle.imageStyle.placeholderBorderColor = "#bae6fd"
         markStyle.imageStyle.placeholderTextColor = "#0c4a6e"
 
         markStyle.paragraphStyle.color = "#0c4a6e"
-        markStyle.headingStyle.color = "#0c4a6e"
-        markStyle.codeBlockStyle.background = "#ecfeff"
+        markStyle.headingStyle.color = "#075985"
+        markStyle.codeBlockStyle.background = "#e0f2fe"
         markStyle.codeBlockStyle.color = "#0c4a6e"
-        markStyle.blockQuoteStyle.background = "#ecfeff"
-        markStyle.blockQuoteStyle.borderColor = "#22d3ee"
-        markStyle.tableStyle.borderColor = "#7dd3fc"
-        markStyle.tableStyle.headerBg = "#bae6fd"
-        markStyle.thematicBreakStyle.color = "#7dd3fc"
+        markStyle.blockQuoteStyle.background = "#e0f2fe"
+        markStyle.blockQuoteStyle.borderColor = "#38bdf8"
+        markStyle.tableStyle.borderColor = "#bae6fd"
+        markStyle.tableStyle.headerBg = "#e0f2fe"
+        markStyle.thematicBreakStyle.color = "#bae6fd"
 
         bgColor = "#f0f9ff"
     }
 
-    function setWarmTheme() {
+    function setCaramelTheme() {
         markStyle.textColor = "#431407"
         markStyle.baseFontSize = 14
 
         markStyle.textStyle.color = "#431407"
-        markStyle.linkStyle.color = "#ea580c"
+        markStyle.linkStyle.color = "#c2410c"
         markStyle.codeStyle.background = "#ffedd5"
-        markStyle.strongStyle.color = "#431407"
+        markStyle.strongStyle.color = "#7c2d12"
         markStyle.emphasisStyle.color = "#431407"
-        markStyle.strikethroughStyle.color = "#431407"
+        markStyle.strikethroughStyle.color = "#a16207"
         markStyle.imageStyle.placeholderBg = "#ffedd5"
-        markStyle.imageStyle.placeholderBorderColor = "#fdba74"
+        markStyle.imageStyle.placeholderBorderColor = "#fed7aa"
         markStyle.imageStyle.placeholderTextColor = "#431407"
 
         markStyle.paragraphStyle.color = "#431407"
-        markStyle.headingStyle.color = "#431407"
+        markStyle.headingStyle.color = "#7c2d12"
         markStyle.codeBlockStyle.background = "#ffedd5"
         markStyle.codeBlockStyle.color = "#431407"
         markStyle.blockQuoteStyle.background = "#ffedd5"
         markStyle.blockQuoteStyle.borderColor = "#f97316"
-        markStyle.tableStyle.borderColor = "#fdba74"
-        markStyle.tableStyle.headerBg = "#fed7aa"
-        markStyle.thematicBreakStyle.color = "#fdba74"
+        markStyle.tableStyle.borderColor = "#fed7aa"
+        markStyle.tableStyle.headerBg = "#ffedd5"
+        markStyle.thematicBreakStyle.color = "#fed7aa"
 
         bgColor = "#fff7ed"
+    }
+
+    function setForestTheme() {
+        markStyle.textColor = "#14532d"
+        markStyle.baseFontSize = 14
+
+        markStyle.textStyle.color = "#14532d"
+        markStyle.linkStyle.color = "#16a34a"
+        markStyle.codeStyle.background = "#dcfce7"
+        markStyle.strongStyle.color = "#166534"
+        markStyle.emphasisStyle.color = "#14532d"
+        markStyle.strikethroughStyle.color = "#3f6212"
+        markStyle.imageStyle.placeholderBg = "#dcfce7"
+        markStyle.imageStyle.placeholderBorderColor = "#bbf7d0"
+        markStyle.imageStyle.placeholderTextColor = "#14532d"
+
+        markStyle.paragraphStyle.color = "#14532d"
+        markStyle.headingStyle.color = "#166534"
+        markStyle.codeBlockStyle.background = "#dcfce7"
+        markStyle.codeBlockStyle.color = "#14532d"
+        markStyle.blockQuoteStyle.background = "#dcfce7"
+        markStyle.blockQuoteStyle.borderColor = "#4ade80"
+        markStyle.tableStyle.borderColor = "#bbf7d0"
+        markStyle.tableStyle.headerBg = "#dcfce7"
+        markStyle.thematicBreakStyle.color = "#bbf7d0"
+
+        bgColor = "#f0fdf4"
+    }
+
+    function setNeonTheme() {
+        markStyle.textColor = "#e2e8f0"
+        markStyle.baseFontSize = 14
+
+        markStyle.textStyle.color = "#e2e8f0"
+        markStyle.linkStyle.color = "#c084fc"
+        markStyle.codeStyle.background = "#2e1065"
+        markStyle.strongStyle.color = "#f0abfc"
+        markStyle.emphasisStyle.color = "#e2e8f0"
+        markStyle.strikethroughStyle.color = "#a78bfa"
+        markStyle.imageStyle.placeholderBg = "#2e1065"
+        markStyle.imageStyle.placeholderBorderColor = "#581c87"
+        markStyle.imageStyle.placeholderTextColor = "#e2e8f0"
+
+        markStyle.paragraphStyle.color = "#e2e8f0"
+        markStyle.headingStyle.color = "#f0abfc"
+        markStyle.codeBlockStyle.background = "#2e1065"
+        markStyle.codeBlockStyle.color = "#e2e8f0"
+        markStyle.blockQuoteStyle.background = "#2e1065"
+        markStyle.blockQuoteStyle.borderColor = "#a855f7"
+        markStyle.tableStyle.borderColor = "#581c87"
+        markStyle.tableStyle.headerBg = "#2e1065"
+        markStyle.thematicBreakStyle.color = "#581c87"
+
+        bgColor = "#1a0b2e"
     }
 
     // 内置 Mark 解析器
