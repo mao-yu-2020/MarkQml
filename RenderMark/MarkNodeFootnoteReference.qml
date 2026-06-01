@@ -25,12 +25,12 @@ Text {
     }
 
     Binding on color {
-        value: root.astStyle.linkColor
+        value: root.astStyle.footnoteReferenceStyle.color
         when: root.astStyle !== null
     }
 
     Binding on font.pixelSize {
-        value: root.astStyle.baseFontSize * 0.75
+        value: root.astStyle.footnoteReferenceStyle.fontSize * 0.75
         when: root.astStyle !== null
     }
 }

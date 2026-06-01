@@ -25,12 +25,12 @@ Text {
     }
 
     Binding on color {
-        value: root.astStyle.textColor
+        value: root.astStyle.unknownStyle.color
         when: root.astStyle !== null
     }
 
     Binding on font.pixelSize {
-        value: root.astStyle.baseFontSize
+        value: root.astStyle.unknownStyle.fontSize
         when: root.astStyle !== null
     }
 }

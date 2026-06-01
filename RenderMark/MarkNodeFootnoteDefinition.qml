@@ -28,11 +28,11 @@ Row {
             when: root.astNode !== null
         }
         Binding on color {
-            value: root.astStyle.linkColor
+            value: root.astStyle.footnoteDefinitionStyle.color
             when: root.astStyle !== null
         }
         Binding on font.pixelSize {
-            value: root.astStyle.baseFontSize * 0.85
+            value: root.astStyle.footnoteDefinitionStyle.fontSize * 0.85
             when: root.astStyle !== null
         }
         anchors.top: parent.top

@@ -22,12 +22,12 @@ Text {
     text: " "
 
     Binding on color {
-        value: root.astStyle.textColor
+        value: root.astStyle.textStyle.color
         when: root.astStyle !== null
     }
 
     Binding on font.pixelSize {
-        value: root.astStyle.baseFontSize
+        value: root.astStyle.textStyle.fontSize
         when: root.astStyle !== null
     }
 }
