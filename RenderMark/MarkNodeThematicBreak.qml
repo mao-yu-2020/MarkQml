@@ -20,10 +20,13 @@ Rectangle {
     }
 
     Binding on color {
-        value: root.astStyle.blockQuoteBorder
+        value: root.astStyle.thematicBreakStyle.color
+        when: root.astStyle !== null
+    }
+    Binding on height {
+        value: root.astStyle ? root.astStyle.thematicBreakStyle.height : 2
         when: root.astStyle !== null
     }
 
     width: parent && parent.parent ? parent.parent.width : 0
-    height: 2
 }
