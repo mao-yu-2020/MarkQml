@@ -68,27 +68,58 @@ Window {
                 }
             }
 
-            RowLayout {
-                spacing: 4
-                Button {
-                    text: "☀️ 亮色"
-                    flat: true
-                    onClicked: renderMark.setLightTheme()
+            ComboBox {
+                id: themeSelector
+                Layout.preferredWidth: 160
+                model: [
+                    { name: "☀️ Daylight", theme: "daylight", preview: "#ffffff" },
+                    { name: "🌙 Midnight", theme: "midnight", preview: "#0d1117" },
+                    { name: "❄️ Glacier",  theme: "glacier",  preview: "#f0f9ff" },
+                    { name: "🔥 Caramel",  theme: "caramel",  preview: "#fff7ed" },
+                    { name: "🌲 Forest",   theme: "forest",   preview: "#f0fdf4" },
+                    { name: "💜 Neon",     theme: "neon",     preview: "#1a0b2e" }
+                ]
+                textRole: "name"
+                valueRole: "theme"
+                currentIndex: 0
+
+                delegate: ItemDelegate {
+                    width: themeSelector.width
+                    height: 32
+                    contentItem: Row {
+                        spacing: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        Rectangle {
+                            width: 12
+                            height: 12
+                            radius: 6
+                            color: modelData.preview
+                            border.color: "#cccccc"
+                            border.width: 1
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: modelData.name
+                            color: parent.parent.palette.text
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+                    highlighted: themeSelector.highlightedIndex === index
                 }
-                Button {
-                    text: "🌙 暗色"
-                    flat: true
-                    onClicked: renderMark.setDarkTheme()
-                }
-                Button {
-                    text: "❄️ 冷色"
-                    flat: true
-                    onClicked: renderMark.setColdTheme()
-                }
-                Button {
-                    text: "🔥 暖色"
-                    flat: true
-                    onClicked: renderMark.setWarmTheme()
+
+                displayText: currentIndex >= 0 && currentIndex < model.length
+                    ? model[currentIndex].name
+                    : ""
+
+                onActivated: {
+                    switch (model[index].theme) {
+                        case "daylight": renderMark.setDaylightTheme(); break;
+                        case "midnight": renderMark.setMidnightTheme(); break;
+                        case "glacier":  renderMark.setGlacierTheme();  break;
+                        case "caramel":  renderMark.setCaramelTheme();  break;
+                        case "forest":   renderMark.setForestTheme();   break;
+                        case "neon":     renderMark.setNeonTheme();     break;
+                    }
                 }
             }
 
@@ -147,6 +178,10 @@ Window {
                 }
             }
         }
+    }
+
+    Component.onCompleted: {
+        renderMark.setDaylightTheme()
     }
 
     // 文件对话框
