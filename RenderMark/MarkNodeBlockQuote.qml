@@ -29,13 +29,22 @@ Rectangle {
         when: root.astStyle !== null
     }
 
-    width: leftBar.width + contentColumn.implicitWidth + root.astStyle.blockQuoteStyle.leftPadding
-    height: contentColumn.implicitHeight
+    Binding on width {
+        value: leftBar.width + contentColumn.implicitWidth + root.astStyle.blockQuoteStyle.leftPadding
+        when: root.astStyle !== null
+    }
+    Binding on height {
+        value: contentColumn.implicitHeight
+        when: root.astStyle !== null
+    }
 
     // 左侧竖线
     Rectangle {
         id: leftBar
-        width: root.astStyle.blockQuoteStyle.borderWidth
+        Binding on width {
+            value: root.astStyle.blockQuoteStyle.borderWidth
+            when: root.astStyle !== null
+        }
         height: root.height
         Binding on color {
             value: root.astStyle.blockQuoteStyle.borderColor
@@ -49,7 +58,7 @@ Rectangle {
         id: contentColumn
         anchors.left: leftBar.right
         anchors.top: parent.top
-        anchors.leftMargin: root.astStyle.blockQuoteStyle.leftPadding
+        anchors.leftMargin: root.astStyle ? root.astStyle.blockQuoteStyle.leftPadding : 12
         astNode: root.astNode
         renderMark: root.renderMark
     }

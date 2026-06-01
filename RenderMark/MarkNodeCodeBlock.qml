@@ -29,8 +29,14 @@ Rectangle {
         when: root.astStyle !== null
     }
 
-    width: contentColumn.implicitWidth + root.astStyle.codeBlockStyle.padding * 2
-    height: contentColumn.implicitHeight + root.astStyle.codeBlockStyle.padding * 2
+    Binding on width {
+        value: contentColumn.implicitWidth + root.astStyle.codeBlockStyle.padding * 2
+        when: root.astStyle !== null
+    }
+    Binding on height {
+        value: contentColumn.implicitHeight + root.astStyle.codeBlockStyle.padding * 2
+        when: root.astStyle !== null
+    }
 
     Column {
         id: contentColumn

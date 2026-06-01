@@ -28,8 +28,14 @@ Rectangle {
         when: root.astStyle !== null
     }
 
-    implicitWidth: textItem.implicitWidth + root.astStyle.codeStyle.hPadding * 2
-    implicitHeight: textItem.implicitHeight + root.astStyle.codeStyle.vPadding * 2
+    Binding on implicitWidth {
+        value: textItem.implicitWidth + root.astStyle.codeStyle.hPadding * 2
+        when: root.astStyle !== null
+    }
+    Binding on implicitHeight {
+        value: textItem.implicitHeight + root.astStyle.codeStyle.vPadding * 2
+        when: root.astStyle !== null
+    }
 
     Text {
         id: textItem
