@@ -6,7 +6,7 @@ import QtQuick
  * @brief 代码块（code_block）渲染组件
  *
  * 带背景色的块级代码区域，支持显示语言标识。
- * 四周保留 12px 内边距，语言标签以 pill 样式呈现。
+ * 四周保留 padding 内边距，语言标签以 pill 样式呈现。
  */
 Rectangle {
     id: root
@@ -21,19 +21,21 @@ Rectangle {
     }
 
     Binding on color {
-        value: root.astStyle.codeBackground
+        value: root.astStyle.codeBlockStyle.background
         when: root.astStyle !== null
     }
-    radius: 4
+    Binding on radius {
+        value: root.astStyle ? root.astStyle.codeBlockStyle.radius : 4
+        when: root.astStyle !== null
+    }
 
-    // 内容区 + 24px 四周留白（12px * 2）
-    width: contentColumn.implicitWidth + 24
-    height: contentColumn.implicitHeight + 24
+    width: contentColumn.implicitWidth + root.astStyle.codeBlockStyle.padding * 2
+    height: contentColumn.implicitHeight + root.astStyle.codeBlockStyle.padding * 2
 
     Column {
         id: contentColumn
-        x: 12
-        y: 12
+        x: root.astStyle ? root.astStyle.codeBlockStyle.padding : 12
+        y: root.astStyle ? root.astStyle.codeBlockStyle.padding : 12
         spacing: 8
 
         // 语言标签 pill
@@ -44,10 +46,7 @@ Rectangle {
             radius: 4
 
             Binding on color {
-                value: {
-                    var c = root.astStyle.textColor;
-                    return Qt.rgba(c.r, c.g, c.b, 0.12);
-                }
+                value: root.astStyle.codeBlockStyle.langLabelBackground
                 when: root.astStyle !== null
             }
 
@@ -59,11 +58,11 @@ Rectangle {
                     when: root.astNode !== null
                 }
                 Binding on color {
-                    value: root.astStyle.textColor
+                    value: root.astStyle.codeBlockStyle.langLabelColor
                     when: root.astStyle !== null
                 }
                 Binding on font.pixelSize {
-                    value: root.astStyle.baseFontSize * 0.8
+                    value: root.astStyle.codeBlockStyle.fontSize * 0.8
                     when: root.astStyle !== null
                 }
                 font.family: "Consolas, Courier New, monospace"
@@ -76,11 +75,11 @@ Rectangle {
                 when: root.astNode !== null
             }
             Binding on color {
-                value: root.astStyle.textColor
+                value: root.astStyle.codeBlockStyle.color
                 when: root.astStyle !== null
             }
             Binding on font.pixelSize {
-                value: root.astStyle.baseFontSize
+                value: root.astStyle.codeBlockStyle.fontSize
                 when: root.astStyle !== null
             }
             font.family: "Consolas, Courier New, monospace"
