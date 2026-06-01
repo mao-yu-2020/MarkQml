@@ -25,23 +25,26 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.fillHeight: true
-    implicitWidth: cellContent.implicitWidth + 16
-    implicitHeight: cellContent.implicitHeight + 16
+    implicitWidth: cellContent.implicitWidth + root.astStyle.tableStyle.cellPadding * 2
+    implicitHeight: cellContent.implicitHeight + root.astStyle.tableStyle.cellPadding * 2
 
     Binding on color {
-        value: root.isHeaderRow ? root.astStyle.tableHeaderBg : "transparent"
+        value: root.isHeaderRow ? root.astStyle.tableStyle.headerBg : root.astStyle.tableStyle.cellBg
         when: root.astStyle !== null
     }
     Binding on border.color {
-        value: root.astStyle.tableBorder
+        value: root.astStyle.tableStyle.borderColor
         when: root.astStyle !== null
     }
-    border.width: 1
+    Binding on border.width {
+        value: root.astStyle ? root.astStyle.tableStyle.borderWidth : 1
+        when: root.astStyle !== null
+    }
 
     MarkRowNodeComponent {
         id: cellContent
-        x: 8
-        y: 8
+        x: root.astStyle.tableStyle.cellPadding
+        y: root.astStyle.tableStyle.cellPadding
         astNode: root.astNode
         renderMark: root.renderMark
     }
