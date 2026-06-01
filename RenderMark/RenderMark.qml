@@ -43,13 +43,180 @@ Flickable {
     /** @brief 样式对象，统一传递给所有子组件（QtObject 支持属性变更通知） */
     QtObject {
         id: markStyle
+
+        // -------------------------------------------------------------------
+        // 全局回退
+        // -------------------------------------------------------------------
         property color textColor: "#2c3e50"
-        property color linkColor: "#3498db"
-        property color codeBackground: "#eaf2f8"
-        property color blockQuoteBorder: "#bdc3c7"
-        property color tableBorder: "#bdc3c7"
-        property color tableHeaderBg: "#d6eaf8"
-        property int baseFontSize: root.baseFontSize
+        property int   baseFontSize: root.baseFontSize
+
+        // -------------------------------------------------------------------
+        // 行内节点样式
+        // -------------------------------------------------------------------
+        property QtObject textStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+        }
+
+        property QtObject linkStyle: QtObject {
+            property color color: "#3498db"
+            property int   fontSize: markStyle.baseFontSize
+            property bool  underline: true
+        }
+
+        property QtObject codeStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property color background: "#eaf2f8"
+            property real  radius: 3
+            property int   hPadding: 4
+            property int   vPadding: 1
+        }
+
+        property QtObject strongStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property bool  bold: true
+        }
+
+        property QtObject emphasisStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property bool  italic: true
+        }
+
+        property QtObject strikethroughStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property bool  strikeout: true
+        }
+
+        property QtObject imageStyle: QtObject {
+            property real  maxWidth: -1
+            property real  maxHeight: -1
+            property real  radius: 0
+            property color placeholderBg: markStyle.codeStyle.background
+            property color placeholderBorderColor: markStyle.tableStyle.borderColor
+            property color placeholderTextColor: markStyle.textColor
+            property int   placeholderFontSize: markStyle.baseFontSize
+        }
+
+        property QtObject footnoteReferenceStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+        }
+
+        // -------------------------------------------------------------------
+        // 块级节点样式
+        // -------------------------------------------------------------------
+        property QtObject paragraphStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property color background: "transparent"
+            property int   topMargin: 0
+            property int   bottomMargin: 8
+        }
+
+        property QtObject headingStyle: QtObject {
+            property color color: markStyle.textColor
+            property color background: "transparent"
+            property int   h1Size: markStyle.baseFontSize * 2.0
+            property int   h2Size: markStyle.baseFontSize * 1.75
+            property int   h3Size: markStyle.baseFontSize * 1.5
+            property int   h4Size: markStyle.baseFontSize * 1.25
+            property int   h5Size: markStyle.baseFontSize * 1.125
+            property int   h6Size: markStyle.baseFontSize * 1.0
+            property int   topMargin: 16
+            property int   bottomMargin: 8
+        }
+
+        property QtObject codeBlockStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property color background: "#eaf2f8"
+            property color langLabelColor: markStyle.textColor
+            property color langLabelBackground: Qt.rgba(0, 0, 0, 0.05)
+            property real  radius: 4
+            property int   padding: 12
+            property int   topMargin: 8
+            property int   bottomMargin: 8
+        }
+
+        property QtObject blockQuoteStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property color background: "#eaf2f8"
+            property color borderColor: "#bdc3c7"
+            property int   borderWidth: 4
+            property real  radius: 4
+            property int   leftPadding: 12
+            property int   topMargin: 8
+            property int   bottomMargin: 8
+        }
+
+        property QtObject listStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property color background: "transparent"
+            property int   topMargin: 8
+            property int   bottomMargin: 8
+            property int   spacing: 4
+        }
+
+        property QtObject itemStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+            property color background: "transparent"
+            property int   spacing: 2
+            property int   bulletRightMargin: 8
+        }
+
+        property QtObject tableStyle: QtObject {
+            property color borderColor: "#bdc3c7"
+            property int   borderWidth: 1
+            property color headerBg: "#d6eaf8"
+            property color cellBg: "transparent"
+            property int   cellPadding: 8
+            property int   topMargin: 8
+            property int   bottomMargin: 8
+        }
+
+        property QtObject thematicBreakStyle: QtObject {
+            property color color: "#bdc3c7"
+            property int   height: 2
+            property int   topMargin: 16
+            property int   bottomMargin: 16
+        }
+
+        // -------------------------------------------------------------------
+        // 其他节点样式
+        // -------------------------------------------------------------------
+        property QtObject documentStyle: QtObject {
+            property color background: "transparent"
+            property int   padding: 0
+        }
+
+        property QtObject htmlBlockStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+        }
+
+        property QtObject htmlInlineStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+        }
+
+        property QtObject footnoteDefinitionStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+        }
+
+        property QtObject softbreakStyle: QtObject { }
+        property QtObject linebreakStyle: QtObject { }
+        property QtObject unknownStyle: QtObject {
+            property color color: markStyle.textColor
+            property int   fontSize: markStyle.baseFontSize
+        }
     }
 
     /**
