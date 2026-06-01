@@ -21,7 +21,7 @@ Row {
         renderMark = rm;
     }
 
-    spacing: 8
+    spacing: root.astStyle ? root.astStyle.itemStyle.bulletRightMargin : 8
 
     // 计算当前 item 在父 list 中的索引，用于有序列表序号
     property int _itemIndex: {
@@ -39,7 +39,6 @@ Row {
     // 左侧标记（bullet 或 number）
     Text {
         id: marker
-        // text: ""
         Binding on text {
             value: {
                 if (!root.astNode) return "•";
@@ -55,11 +54,11 @@ Row {
             when: root.astNode !== null
         }
         Binding on color {
-            value: root.astStyle.textColor
+            value: root.astStyle.itemStyle.color
             when: root.astStyle !== null
         }
         Binding on font.pixelSize {
-            value: root.astStyle.baseFontSize
+            value: root.astStyle.itemStyle.fontSize
             when: root.astStyle !== null
         }
     }
