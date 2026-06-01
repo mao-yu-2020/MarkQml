@@ -5,7 +5,7 @@ import QtQuick
 /**
  * @brief 图片（image）渲染组件
  *
- * 加载并显示图片，限制最大宽度为 600px。
+ * 加载并显示图片，限制最大宽度为 600px（可通过 imageStyle.maxWidth 覆盖）。
  * 本地路径自动补全 file:/// 前缀。
  * 加载失败时显示占位提示。
  */
@@ -42,7 +42,10 @@ Item {
         x: 0
         y: 0
         fillMode: Image.PreserveAspectFit
-        sourceSize.width: 600
+        sourceSize.width: {
+            var mw = root.astStyle ? root.astStyle.imageStyle.maxWidth : -1;
+            return mw > 0 ? mw : 600;
+        }
 
         Binding on source {
             value: {
@@ -76,15 +79,15 @@ Item {
         visible: image.status !== Image.Ready
         anchors.fill: parent
         Binding on color {
-            value: root.astStyle.codeBackground
+            value: root.astStyle.imageStyle.placeholderBg
             when: root.astStyle !== null
         }
         Binding on border.color {
-            value: root.astStyle.tableBorder
+            value: root.astStyle.imageStyle.placeholderBorderColor
             when: root.astStyle !== null
         }
         border.width: 1
-        radius: 4
+        radius: root.astStyle ? root.astStyle.imageStyle.radius : 0
 
         Column {
             anchors.centerIn: parent
@@ -93,11 +96,11 @@ Item {
             Text {
                 text: image.status === Image.Loading ? "加载中..." : "图片加载失败"
                 Binding on color {
-                    value: root.astStyle.textColor
+                    value: root.astStyle.imageStyle.placeholderTextColor
                     when: root.astStyle !== null
                 }
                 Binding on font.pixelSize {
-                    value: root.astStyle.baseFontSize
+                    value: root.astStyle.imageStyle.placeholderFontSize
                     when: root.astStyle !== null
                 }
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -106,11 +109,11 @@ Item {
             Text {
                 text: root.astNode ? root.astNode.url : ""
                 Binding on color {
-                    value: root.astStyle.textColor
+                    value: root.astStyle.imageStyle.placeholderTextColor
                     when: root.astStyle !== null
                 }
                 Binding on font.pixelSize {
-                    value: root.astStyle.baseFontSize * 0.75
+                    value: root.astStyle.imageStyle.placeholderFontSize * 0.75
                     when: root.astStyle !== null
                 }
                 opacity: 0.6
