@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rendermark_export.h"
+
 #include <QObject>
 #include <QQmlEngine>
 
@@ -12,7 +14,7 @@
  * 内部持有一个根 MarkNode（type 通常为 "document"），
  * QML 通过 root 属性访问整棵 AST 树。
  */
-class MarkTree : public QObject
+class RENDERMARK_EXPORT MarkTree : public QObject
 {
     Q_OBJECT
     QML_ELEMENT

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rendermark_export.h"
+
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
@@ -11,7 +13,7 @@
  * 代表 Markdown 抽象语法树中的一个节点（如 heading、paragraph、text、link 等）。
  * 继承 QObject 并注册为 QML 元素，QML 可直接访问其属性来渲染对应 UI 元素。
  */
-class MarkNode : public QObject
+class RENDERMARK_EXPORT MarkNode : public QObject
 {
     Q_OBJECT
     QML_ELEMENT

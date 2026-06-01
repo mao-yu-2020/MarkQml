@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rendermark_export.h"
+
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
@@ -15,7 +17,7 @@
  *
  * 继承 QObject 并注册为 QML 元素，可直接在 QML 中实例化使用。
  */
-class Mark : public QObject
+class RENDERMARK_EXPORT Mark : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
