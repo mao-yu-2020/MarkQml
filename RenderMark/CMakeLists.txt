@@ -8,7 +8,13 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 
-qt_add_library(RenderMark STATIC)
+qt_add_library(RenderMark SHARED)
+
+include(GenerateExportHeader)
+generate_export_header(RenderMark
+    BASE_NAME RENDERMARK
+    EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/rendermark_export.h"
+)
 
 set(RENDERMARK_QML_FILES
     RenderMark.qml
@@ -77,22 +83,45 @@ target_link_libraries(RenderMark
         ${CMARK_LIBS}
 )
 
+target_include_directories(RenderMark
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:include/RenderMark>
+)
+
+if(NOT WIN32)
+    target_compile_options(RenderMark PRIVATE -fvisibility=hidden)
+endif()
+
 # -----------------------------------------------------------------------
 # 安装与导出（使外部项目可通过 find_package(RenderMark) 使用）
 # -----------------------------------------------------------------------
 
 include(GNUInstallDirs)
 
-# 安装静态库
-install(TARGETS RenderMark RenderMarkplugin
+# Install main shared library
+install(TARGETS RenderMark
     EXPORT RenderMarkTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+# Install QML plugin into QML import path (needed for runtime QML engine loading)
+install(TARGETS RenderMarkplugin
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+    LIBRARY DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+    RUNTIME DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
+)
+
 # 安装头文件
 install(FILES ${RENDERMARK_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RenderMark
+)
+
+# Install generated export header
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rendermark_export.h"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RenderMark
 )
 
@@ -148,15 +177,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qmldir"
 # 安装 .qmltypes 文件（QML Language Server 识别类型所需）
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/RenderMark.qmltypes"
     DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
-)
-
-# 生成静态插件导入文件，供外部项目自动编译以确保 QML 类型被注册
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/rendermark_plugin_import.cpp"
-    "#include <QtPlugin>\n"
-    "Q_IMPORT_PLUGIN(RenderMarkPlugin)\n"
-)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rendermark_plugin_import.cpp"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RenderMark
 )
 
 # 生成 CMake 包配置文件（手动定义 IMPORTED 目标，避免导出 QML 内部资源目标）
