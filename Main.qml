@@ -111,7 +111,7 @@ Window {
                     ? model[currentIndex].name
                     : ""
 
-                onActivated: {
+                onActivated: function(index) {
                     switch (model[index].theme) {
                         case "daylight": renderMark.setDaylightTheme(); break;
                         case "midnight": renderMark.setMidnightTheme(); break;
