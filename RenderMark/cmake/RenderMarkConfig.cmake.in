@@ -31,28 +31,39 @@ if(NOT TARGET cmark-gfm-extensions)
     endif()
 endif()
 
-# 创建 RenderMarkplugin IMPORTED 目标（QML 静态插件）
+# 创建 RenderMarkplugin IMPORTED 目标（QML 动态插件）
 if(NOT TARGET RenderMarkplugin)
-    add_library(RenderMarkplugin STATIC IMPORTED)
-    set_target_properties(RenderMarkplugin PROPERTIES
-        IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}RenderMarkplugin${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    )
+    add_library(RenderMarkplugin SHARED IMPORTED)
+    if(WIN32)
+        set_target_properties(RenderMarkplugin PROPERTIES
+            IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}RenderMarkplugin${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/qml/RenderMark/${CMAKE_SHARED_LIBRARY_PREFIX}RenderMarkplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        )
+    else()
+        set_target_properties(RenderMarkplugin PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/qml/RenderMark/${CMAKE_SHARED_LIBRARY_PREFIX}RenderMarkplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        )
+    endif()
 endif()
 
 # 创建 RenderMark::RenderMark IMPORTED 目标（手动定义，避免导出 QML 内部资源目标）
 if(NOT TARGET RenderMark::RenderMark)
-    add_library(RenderMark::RenderMark STATIC IMPORTED)
+    add_library(RenderMark::RenderMark SHARED IMPORTED)
+    if(WIN32)
+        set_target_properties(RenderMark::RenderMark PROPERTIES
+            IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}RenderMark${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}RenderMark${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        )
+    else()
+        set_target_properties(RenderMark::RenderMark PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}RenderMark${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        )
+    endif()
     set_target_properties(RenderMark::RenderMark PROPERTIES
-        IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}RenderMark${CMAKE_STATIC_LIBRARY_SUFFIX}"
         INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/RenderMark"
-        INTERFACE_LINK_LIBRARIES "Qt6::Quick;cmark-gfm;cmark-gfm-extensions;RenderMarkplugin"
+        INTERFACE_LINK_LIBRARIES "Qt6::Quick;cmark-gfm;cmark-gfm-extensions"
     )
 endif()
-
-# 自动编译静态插件导入文件，确保外部项目链接时 QML 类型被正确注册
-set_property(TARGET RenderMark::RenderMark APPEND PROPERTY
-    INTERFACE_SOURCES "${PACKAGE_PREFIX_DIR}/include/RenderMark/rendermark_plugin_import.cpp"
-)
 
 # 提供 QML 导入路径变量（供外部项目 engine.addImportPath() 使用）
 set(RenderMark_QML_IMPORT_PATH "${PACKAGE_PREFIX_DIR}/lib/qml")
