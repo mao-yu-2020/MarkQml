@@ -100,6 +100,9 @@ endif()
 
 include(GNUInstallDirs)
 
+# 提前定义 QML 安装路径（供后续 install 使用）
+set(CMAKE_INSTALL_QMLDIR "${CMAKE_INSTALL_LIBDIR}/qml" CACHE PATH "QML import path")
+
 # Install main shared library
 install(TARGETS RenderMark
     EXPORT RenderMarkTargets
@@ -163,7 +166,6 @@ endif()
 set(CMARK_GFM_BUNDLED TRUE)
 
 # 安装 QML 原始文件（便于外部开发时引用或调试）
-set(CMAKE_INSTALL_QMLDIR "${CMAKE_INSTALL_LIBDIR}/qml" CACHE PATH "QML import path")
 install(FILES ${RENDERMARK_QML_FILES}
     DESTINATION ${CMAKE_INSTALL_QMLDIR}/RenderMark
 )

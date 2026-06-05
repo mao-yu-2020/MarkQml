@@ -6,28 +6,44 @@ find_dependency(Qt6 COMPONENTS Quick)
 
 # 创建 bundled cmark-gfm IMPORTED 目标（库随 RenderMark 一起安装，无需外部 vcpkg）
 if(NOT TARGET cmark-gfm)
-    add_library(cmark-gfm STATIC IMPORTED)
-    if(ANDROID)
+    if(WIN32)
+        add_library(cmark-gfm SHARED IMPORTED)
         set_target_properties(cmark-gfm PROPERTIES
-            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}cmark-gfm${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}cmark-gfm${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
     else()
-        set_target_properties(cmark-gfm PROPERTIES
-            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm${CMAKE_STATIC_LIBRARY_SUFFIX}"
-        )
+        add_library(cmark-gfm STATIC IMPORTED)
+        if(ANDROID)
+            set_target_properties(cmark-gfm PROPERTIES
+                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            )
+        else()
+            set_target_properties(cmark-gfm PROPERTIES
+                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            )
+        endif()
     endif()
 endif()
 
 if(NOT TARGET cmark-gfm-extensions)
-    add_library(cmark-gfm-extensions STATIC IMPORTED)
-    if(ANDROID)
+    if(WIN32)
+        add_library(cmark-gfm-extensions SHARED IMPORTED)
         set_target_properties(cmark-gfm-extensions PROPERTIES
-            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
     else()
-        set_target_properties(cmark-gfm-extensions PROPERTIES
-            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_STATIC_LIBRARY_SUFFIX}"
-        )
+        add_library(cmark-gfm-extensions STATIC IMPORTED)
+        if(ANDROID)
+            set_target_properties(cmark-gfm-extensions PROPERTIES
+                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            )
+        else()
+            set_target_properties(cmark-gfm-extensions PROPERTIES
+                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            )
+        endif()
     endif()
 endif()
 
