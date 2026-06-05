@@ -6,6 +6,105 @@
 
 ---
 
+## 🚀 快速开始：安装并使用 RenderMark 库
+
+### 1. 编译并安装
+
+使用 **Qt Creator** 编译本项目后，进入包含 `cmake_install.cmake` 的**构建子目录**执行安装指令：
+
+```bash
+# 注意：不是 build/ 根目录，而是 Qt Creator 实际生成的子目录
+cd build/Desktop_Qt_6_8_3_MSVC2022_64bit-RelWithDebInfo
+cmake --install . --prefix "D:/temp"
+```
+
+> ⚠️ **注意**：`build/` 本身不是 CMake 构建目录，真正的构建目录是其下的子目录（如 `Desktop_Qt_6_8_3_MSVC2022_64bit-RelWithDebInfo`）。`cmake_install.cmake` 位于该子目录内，直接对 `build/` 执行会报错 `Not a file: .../build/cmake_install.cmake`。
+
+安装后目录结构示例：
+
+```
+D:/temp/
+├── bin/                          # .exe + .dll（运行时）
+│   ├── RenderMark.dll
+│   ├── cmark-gfm.dll
+│   └── cmark-gfm-extensions.dll
+├── lib/
+│   ├── RenderMark.lib            # Windows import library
+│   ├── cmake/RenderMark/         # find_package 配置
+│   └── qml/RenderMark/           # QML 模块（qmldir + .qml + 插件）
+└── include/RenderMark/           # C++ 头文件
+```
+
+### 2. 在其他 Qt 项目中使用
+
+#### CMake 配置
+
+```cmake
+list(APPEND CMAKE_PREFIX_PATH "D:/temp")
+find_package(RenderMark CONFIG REQUIRED)
+
+target_link_libraries(你的目标 PRIVATE RenderMark::RenderMark)
+```
+
+在 **Qt Creator** 中设置：**Projects → Build → Initial CMake parameters** 添加：
+```
+-DCMAKE_PREFIX_PATH=D:/temp
+```
+
+#### C++ 代码中注册 QML 导入路径
+
+```cpp
+#include <QQmlApplicationEngine>
+
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+
+    // 桌面平台：让 QML 引擎从安装目录加载 RenderMark 模块
+    engine.addImportPath("D:/temp/lib/qml");
+
+    engine.loadFromModule("你的项目", "Main");
+    return app.exec();
+}
+```
+
+> 📱 **Android 平台**：不需要手动 `addImportPath`。RenderMark 的 QML 模块和 `libRenderMarkplugin.so` 会由 Qt 部署工具（`androiddeployqt`）自动打包进 APK，运行时 QML 引擎直接从 APK 内部加载。
+
+#### QML 中使用
+
+```qml
+import QtQuick
+import RenderMark 1.0
+
+Window {
+    width: 800; height: 600; visible: true
+    RenderMark { id: renderer }
+}
+```
+
+#### 运行时库路径
+
+**Windows（桌面端）**：
+
+确保以下 DLL 能被加载：
+- `RenderMark.dll`
+- `cmark-gfm.dll`
+- `cmark-gfm-extensions.dll`
+
+推荐方式：在 Qt Creator → **Projects → Run → Environment** 中，将 `D:/temp/bin` 加入 `PATH`：
+```
+PATH=D:/temp/bin;%PATH%
+```
+
+**Android**：
+
+- Android 没有 DLL 概念，对应的是 `.so` 共享库（`libRenderMark.so`、`libcmark-gfm.so` 等）
+- 这些 `.so` 文件由 `androiddeployqt` / Gradle 自动打包到 APK 的 `libs/<abi>/` 目录下
+- **不需要手动配置路径**，Qt 的 Android 部署机制会自动处理
+
+---
+
 ## 特性
 
 - 🚀 **纯 QML 渲染** — 无需内嵌浏览器，性能更高、内存占用更低
