@@ -141,8 +141,23 @@ endif()
 
 if(ANDROID)
     # Android 平台：cmark-gfm 是静态库（.a），通过目标属性获取实际路径
-    get_target_property(CMARK_GFM_LIB libcmark-gfm_static IMPORTED_LOCATION)
-    get_target_property(CMARK_GFM_EXT_LIB libcmark-gfm-extensions_static IMPORTED_LOCATION)
+    # 多配置导入目标需要按构建类型取路径，并回退到 RELEASE / DEBUG
+    get_target_property(CMARK_GFM_LIB libcmark-gfm_static IMPORTED_LOCATION_${CMAKE_BUILD_TYPE})
+    if(NOT CMARK_GFM_LIB)
+        get_target_property(CMARK_GFM_LIB libcmark-gfm_static IMPORTED_LOCATION_RELEASE)
+    endif()
+    if(NOT CMARK_GFM_LIB)
+        get_target_property(CMARK_GFM_LIB libcmark-gfm_static IMPORTED_LOCATION_DEBUG)
+    endif()
+
+    get_target_property(CMARK_GFM_EXT_LIB libcmark-gfm-extensions_static IMPORTED_LOCATION_${CMAKE_BUILD_TYPE})
+    if(NOT CMARK_GFM_EXT_LIB)
+        get_target_property(CMARK_GFM_EXT_LIB libcmark-gfm-extensions_static IMPORTED_LOCATION_RELEASE)
+    endif()
+    if(NOT CMARK_GFM_EXT_LIB)
+        get_target_property(CMARK_GFM_EXT_LIB libcmark-gfm-extensions_static IMPORTED_LOCATION_DEBUG)
+    endif()
+
     if(CMARK_GFM_LIB AND CMARK_GFM_EXT_LIB)
         install(FILES ${CMARK_GFM_LIB} ${CMARK_GFM_EXT_LIB}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}

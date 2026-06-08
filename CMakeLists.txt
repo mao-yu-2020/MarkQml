@@ -31,4 +31,5 @@ target_link_libraries(appMarkQml PRIVATE Qt6::Quick RenderMark)
 install(TARGETS appMarkQml
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
