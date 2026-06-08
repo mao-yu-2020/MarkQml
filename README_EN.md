@@ -8,7 +8,87 @@ A native **Qt 6 + QML** Markdown renderer powered by `cmark-gfm`. It parses Mark
 
 ## 🚀 Quick Start: Build and Use the RenderMark Library
 
-### 1. Build and Install
+### 1. Dependencies
+
+- Qt 6.8+
+- CMake 3.16+
+- cmark-gfm (with extensions) — **managed via vcpkg**
+
+### 2. Get the Source and Build
+
+This project uses [vcpkg](https://github.com/microsoft/vcpkg) as the C++ dependency package manager. The `vcpkg.json` in the project root is a **manifest** that defines the required dependencies:
+
+```json
+{
+  "name": "markqml",
+  "version": "0.1.0",
+  "dependencies": [
+    "cmark-gfm"
+  ]
+}
+```
+
+The vcpkg port for `cmark-gfm` automatically pulls the core library and all extensions (table, strikethrough, autolinks, tagfilter, tasklist); there is no need to declare extensions separately in `vcpkg.json`.
+
+#### Qt Creator vcpkg Plugin (Default)
+
+This project assumes by default that you have installed and configured the [vcpkg plugin](https://doc.qt.io/qtcreator/creator-vcpkg.html) in **Qt Creator**. The plugin automatically recognizes the `vcpkg.json` in the project root and downloads and integrates dependencies in the background, without requiring you to manually specify `CMAKE_TOOLCHAIN_FILE` on the CMake command line.
+
+#### Option 1: vcpkg Manifest Mode (Command Line / No Plugin)
+
+If you are not using the Qt Creator vcpkg plugin and don't want to pass `-DCMAKE_TOOLCHAIN_FILE` every time on the command line, you can add the following directly at the top of `CMakeLists.txt`:
+
+```cmake
+include(${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+```
+
+> Replace the path with the actual location of your local vcpkg repository.
+
+Or, specify the toolchain explicitly at build time:
+
+```bash
+# 1. Clone vcpkg (if not already cloned)
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+.\bootstrap-vcpkg.bat    # Windows
+# ./bootstrap-vcpkg.sh   # Linux / macOS
+
+# 2. Build from project root (CMake will automatically read vcpkg.json and install dependencies)
+cd /path/to/MarkQml
+mkdir build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build . --config Release
+```
+
+In Qt Creator, you can add the following under **Projects → Build → CMake → Initial CMake parameters**:
+
+```
+-DCMAKE_TOOLCHAIN_FILE:STRING=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+```
+
+#### Option 2: Manual vcpkg Installation
+
+```bash
+vcpkg install cmark-gfm
+```
+
+After installation, you still need to specify `CMAKE_TOOLCHAIN_FILE` in the CMake configuration.
+
+#### Build Command Examples
+
+```bash
+# Windows (Visual Studio 2022)
+mkdir build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 17 2022"
+cmake --build . --config Release
+
+# Linux / macOS
+mkdir build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build .
+```
+
+### 3. Install RenderMark
 
 After building this project with **Qt Creator**, enter the **build subdirectory** that contains `cmake_install.cmake` and run the install command:
 
@@ -35,25 +115,42 @@ D:/temp/
 └── include/RenderMark/           # C++ headers
 ```
 
-### 2. Use in Another Qt Project
+> Note: The cmark-gfm libraries are bundled with RenderMark, so external projects **do not need to install cmark-gfm separately**.
+
+### 4. Use in Another Qt Project
 
 #### CMake Configuration
 
 ```cmake
 list(APPEND CMAKE_PREFIX_PATH "D:/temp")
+find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(RenderMark CONFIG REQUIRED)
 
-target_link_libraries(YourTarget PRIVATE RenderMark::RenderMark)
+# Provide the QML import path for Qt Creator's QML Language Server
+set(QML_IMPORT_PATH "${RenderMark_QML_IMPORT_PATH}" CACHE STRING "")
+
+qt_add_executable(MyApp main.cpp)
+qt_add_qml_module(MyApp
+    URI MyApp
+    QML_FILES Main.qml
+)
+
+target_link_libraries(MyApp PRIVATE
+    Qt6::Quick
+    RenderMark::RenderMark    # Automatically links RenderMark + RenderMarkplugin
+)
 ```
 
 In **Qt Creator**: go to **Projects → Build → Initial CMake parameters** and add:
+
 ```
 -DCMAKE_PREFIX_PATH=D:/temp
 ```
 
-#### Register QML Import Path in C++
+#### C++ Code
 
 ```cpp
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
 int main(int argc, char *argv[])
@@ -61,10 +158,10 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    // Desktop platforms: let the QML engine load RenderMark from the install directory
+    // If you need to load QML from the filesystem (instead of built-in resources), add the import path
     engine.addImportPath("D:/temp/lib/qml");
 
-    engine.loadFromModule("YourProject", "Main");
+    engine.loadFromModule("MyApp", "Main");
     return app.exec();
 }
 ```
@@ -79,7 +176,11 @@ import RenderMark 1.0
 
 Window {
     width: 800; height: 600; visible: true
-    RenderMark { id: renderer }
+
+    RenderMark {
+        anchors.fill: parent
+        markdown: "# Hello World"
+    }
 }
 ```
 
@@ -103,7 +204,10 @@ PATH=D:/temp/bin;%PATH%
 - These `.so` files are automatically packaged into the APK's `libs/<abi>/` directory by `androiddeployqt` / Gradle
 - **No manual path configuration is required** — Qt's Android deployment mechanism handles this automatically
 
----
+#### Notes
+
+- **MSVC Runtime Matching**: RenderMark and its dependency cmark-gfm are static libraries and must match the consuming project's MSVC runtime configuration. If RenderMark is built with `RelWithDebInfo` (`/MD`), the consuming project must also be built with `RelWithDebInfo` or `Release`; mixing with `Debug` (`/MDd`) will cause `_ITERATOR_DEBUG_LEVEL` linker errors.
+- **No vcpkg required**: cmark-gfm is bundled with RenderMark, so external projects do not need a `vcpkg.json` or `CMAKE_TOOLCHAIN_FILE`.
 
 ## Features
 
@@ -321,210 +425,131 @@ This correctly propagates styles through arbitrary nesting depths (e.g. `strong 
 
 ---
 
-## Build
+## 📦 Use Case
 
-### Dependencies
+[testmarkqml](https://github.com/yourname/testmarkqml) is a minimal external-project example demonstrating how to integrate RenderMark into a standalone Qt 6 project.
 
-- Qt 6.8+
-- CMake 3.16+
-- cmark-gfm (with extensions) — **managed via vcpkg**
+**Project Structure**
 
-### vcpkg Package Management
-
-This project uses [vcpkg](https://github.com/microsoft/vcpkg) as the C++ dependency package manager. The `vcpkg.json` in the project root is a **manifest** that defines the required dependencies:
-
-```json
-{
-  "name": "markqml",
-  "version": "0.1.0",
-  "dependencies": [
-    "cmark-gfm"
-  ]
-}
+```
+testmarkqml/
+├── CMakeLists.txt
+├── main.cpp
+└── Main.qml
 ```
 
-The vcpkg port for `cmark-gfm` automatically pulls the core library and all extensions (table, strikethrough, autolinks, tagfilter, tasklist); there is no need to declare extensions separately in `vcpkg.json`.
-
-#### Qt Creator vcpkg Plugin (Default)
-
-This project assumes by default that you have installed and configured the [vcpkg plugin](https://doc.qt.io/qtcreator/creator-vcpkg.html) in **Qt Creator**. The plugin automatically recognizes the `vcpkg.json` in the project root and downloads and integrates dependencies in the background, without requiring you to manually specify `CMAKE_TOOLCHAIN_FILE` on the CMake command line.
-
-#### Option 1: vcpkg Manifest Mode (Command Line / No Plugin)
-
-If you are not using the Qt Creator vcpkg plugin and don't want to pass `-DCMAKE_TOOLCHAIN_FILE` every time on the command line, you can add the following directly at the top of `CMakeLists.txt`:
+**CMakeLists.txt**
 
 ```cmake
-include(${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-```
+cmake_minimum_required(VERSION 3.16)
 
-> Replace the path with the actual location of your local vcpkg repository.
+project(testmarkqml VERSION 0.1 LANGUAGES CXX)
 
-Or, specify the toolchain explicitly at build time:
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-```bash
-# 1. Clone vcpkg (if not already cloned)
-git clone https://github.com/microsoft/vcpkg.git
-cd vcpkg
-.\bootstrap-vcpkg.bat    # Windows
-# ./bootstrap-vcpkg.sh   # Linux / macOS
+list(APPEND CMAKE_PREFIX_PATH "D:/temp")
 
-# 2. Build from project root (CMake will automatically read vcpkg.json and install dependencies)
-cd /path/to/MarkQml
-mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
-cmake --build . --config Release
-```
-
-In Qt Creator, you can add the following under **Projects → Build → CMake → Initial CMake parameters**:
-
-```
--DCMAKE_TOOLCHAIN_FILE:STRING=C:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
-```
-
-#### Option 2: Manual vcpkg Installation
-
-```bash
-vcpkg install cmark-gfm
-```
-
-After installation, you still need to specify `CMAKE_TOOLCHAIN_FILE` in the CMake configuration.
-
-### Build Command Examples
-
-```bash
-# Windows (Visual Studio 2022)
-mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 17 2022"
-cmake --build . --config Release
-
-# Linux / macOS
-mkdir build && cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg/scripts/buildsystems/vcpkg.cmake
-cmake --build .
-```
-
----
-
-## Installation & Export
-
-The RenderMark library supports installation to a system or custom directory via CMake `install`, and generates package config files so external projects can use it directly through `find_package(RenderMark)`.
-
-### Install to a Custom Directory
-
-```bash
-# Install to a custom directory (recommended)
-cmake --install <build-dir> --prefix D:/temp/RenderMark
-
-# Or install to the system default path (Unix)
-cmake --install <build-dir>
-```
-
-Directory structure after installation:
-
-```
-RenderMark/
-├── bin/
-│   ├── appMarkQml.exe               # Main executable (optional)
-│   ├── cmark-gfm.dll                # cmark-gfm runtime (Windows)
-│   └── cmark-gfm-extensions.dll     # cmark-gfm extensions runtime (Windows)
-├── include/RenderMark/
-│   ├── Mark.h                        # C++ headers
-│   ├── MarkNode.h
-│   ├── MarkTree.h
-│   └── rendermark_plugin_import.cpp  # Static plugin auto-registration
-├── lib/
-│   ├── RenderMark.lib                # Main static library
-│   ├── RenderMarkplugin.lib          # QML plugin static library
-│   ├── cmark-gfm.lib                 # cmark-gfm import library (bundled)
-│   ├── cmark-gfm-extensions.lib      # cmark-gfm extensions import library (bundled)
-│   ├── cmake/RenderMark/
-│   │   ├── RenderMarkConfig.cmake    # CMake package config
-│   │   └── RenderMarkConfigVersion.cmake
-│   └── qml/RenderMark/               # QML module
-│       ├── qmldir
-│       ├── RenderMark.qmltypes       # QML type info
-│       └── ... (QML files)
-```
-
-> Note: The cmark-gfm libraries are bundled with RenderMark, so external projects **do not need to install cmark-gfm separately**.
-
-### Use in Another CMake Project
-
-**1. Specify the installation path**
-
-```bash
-cmake -B build -S . -DCMAKE_PREFIX_PATH="D:/temp/RenderMark"
-```
-
-Or set it directly in `CMakeLists.txt`:
-
-```cmake
-list(APPEND CMAKE_PREFIX_PATH "D:/temp/RenderMark")
-```
-
-**2. CMakeLists.txt**
-
-```cmake
+find_package(RenderMark CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Quick)
-find_package(RenderMark CONFIG REQUIRED)  # Automatically finds RenderMarkConfig.cmake
 
-# Provide the QML import path for Qt Creator's QML Language Server
 set(QML_IMPORT_PATH "${RenderMark_QML_IMPORT_PATH}" CACHE STRING "")
 
-qt_add_executable(MyApp main.cpp)
-qt_add_qml_module(MyApp
-    URI MyApp
-    QML_FILES Main.qml
+qt_standard_project_setup(REQUIRES 6.8)
+
+qt_add_executable(apptestmarkqml
+    main.cpp
 )
 
-target_link_libraries(MyApp PRIVATE
-    Qt6::Quick
-    RenderMark::RenderMark    # Automatically links RenderMark + RenderMarkplugin
+qt_add_qml_module(apptestmarkqml
+    URI testmarkqml
+    QML_FILES
+        Main.qml
+)
+
+set_target_properties(apptestmarkqml PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
+
+target_link_libraries(apptestmarkqml
+    PRIVATE Qt6::Quick
+    RenderMark::RenderMark
 )
 ```
 
-**3. C++ code**
+**main.cpp**
 
 ```cpp
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <Mark.h>
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+
     QQmlApplicationEngine engine;
+    QObject::connect(
+        &engine,
+        &QQmlApplicationEngine::objectCreationFailed,
+        &app,
+        []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
 
-    // If you need to load QML from the filesystem (instead of built-in resources), add the import path
-    // engine.addImportPath("D:/temp/RenderMark/lib/qml");
+    engine.addImportPath("D:/temp/RenderMark/lib/qml");
+    engine.loadFromModule("testmarkqml", "Main");
 
-    engine.loadFromModule("MyApp", "Main");
     return app.exec();
 }
 ```
 
-**4. QML code**
+**Main.qml**
 
 ```qml
 import QtQuick
-import RenderMark 1.0
+import RenderMark 1.0 as RenderMark
 
 Window {
-    width: 800; height: 600; visible: true
+    width: 640
+    height: 480
+    visible: true
+    title: qsTr("Hello World")
 
-    RenderMark {
+    RenderMark.RenderMark {
         anchors.fill: parent
-        markdown: "# Hello World"
+        markdown:
+        "# MarkQml Test Document\n\n" +
+        "This is a test of **bold** and *italic* text.\n\n" +
+        "## Code Block\n\n" +
+        "```cpp\n" +
+        "#include <iostream>\n\n" +
+        "int main() {\n" +
+        "    std::cout << "Hello MarkQml!" << std::endl;\n" +
+        "    return 0;\n" +
+        "}\n" +
+        "```\n\n" +
+        "## List Demo\n\n" +
+        "- Unordered item A\n" +
+        "- Unordered item B\n" +
+        "- Unordered item C\n\n" +
+        "1. Ordered item 1\n" +
+        "2. Ordered item 2\n" +
+        "3. Ordered item 3\n\n" +
+        "## Link\n\n" +
+        "[Qt Official Website](https://www.qt.io)\n\n" +
+        "## Table\n\n" +
+        "| Name | Type | Description |\n" +
+        "|------|------|-------------|\n" +
+        "| Mark | class | Markdown parser |\n" +
+        "| MarkNode | class | AST node |\n" +
+        "| MarkTree | class | AST tree container |\n\n" +
+        "> This is a blockquote.\n\n" +
+        "---\n\n" +
+        "**Use the button above to open a local .md file for testing.**"
     }
 }
 ```
-
-> The `RenderMark::RenderMark` target automatically links `RenderMarkplugin` through `INTERFACE_LINK_LIBRARIES`, and automatically compiles `rendermark_plugin_import.cpp` through `INTERFACE_SOURCES` to ensure QML types are correctly registered at application startup. External projects only need to link `RenderMark::RenderMark`.
-
-### Notes
-
-- **MSVC Runtime Matching**: RenderMark and its dependency cmark-gfm are static libraries and must match the consuming project's MSVC runtime configuration. If RenderMark is built with `RelWithDebInfo` (`/MD`), the consuming project must also be built with `RelWithDebInfo` or `Release`; mixing with `Debug` (`/MDd`) will cause `_ITERATOR_DEBUG_LEVEL` linker errors.
-- **No vcpkg required**: cmark-gfm is bundled with RenderMark, so external projects do not need a `vcpkg.json` or `CMAKE_TOOLCHAIN_FILE`.
 
 ---
 
