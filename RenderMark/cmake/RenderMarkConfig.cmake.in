@@ -14,15 +14,9 @@ if(NOT TARGET cmark-gfm)
         )
     else()
         add_library(cmark-gfm STATIC IMPORTED)
-        if(ANDROID)
-            set_target_properties(cmark-gfm PROPERTIES
-                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
-            )
-        else()
-            set_target_properties(cmark-gfm PROPERTIES
-                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm${CMAKE_STATIC_LIBRARY_SUFFIX}"
-            )
-        endif()
+        set_target_properties(cmark-gfm PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}@RENDERMARK_CONFIG_CMARK_NAME@${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
     endif()
 endif()
 
@@ -35,15 +29,9 @@ if(NOT TARGET cmark-gfm-extensions)
         )
     else()
         add_library(cmark-gfm-extensions STATIC IMPORTED)
-        if(ANDROID)
-            set_target_properties(cmark-gfm-extensions PROPERTIES
-                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions_static${CMAKE_STATIC_LIBRARY_SUFFIX}"
-            )
-        else()
-            set_target_properties(cmark-gfm-extensions PROPERTIES
-                IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_STATIC_LIBRARY_SUFFIX}"
-            )
-        endif()
+        set_target_properties(cmark-gfm-extensions PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}@RENDERMARK_CONFIG_CMARK_EXT_NAME@${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        )
     endif()
 endif()
 
@@ -57,7 +45,7 @@ if(NOT TARGET RenderMarkplugin)
         )
     else()
         set_target_properties(RenderMarkplugin PROPERTIES
-            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/qml/RenderMark/${CMAKE_SHARED_LIBRARY_PREFIX}RenderMarkplugin${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/qml/RenderMark/${CMAKE_SHARED_LIBRARY_PREFIX}@RENDERMARK_CONFIG_PLUGIN_NAME@${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
     endif()
 endif()
@@ -72,7 +60,7 @@ if(NOT TARGET RenderMark::RenderMark)
         )
     else()
         set_target_properties(RenderMark::RenderMark PROPERTIES
-            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}RenderMark${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}RenderMark@RENDERMARK_CONFIG_ABI_SUFFIX@${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
     endif()
     set_target_properties(RenderMark::RenderMark PROPERTIES

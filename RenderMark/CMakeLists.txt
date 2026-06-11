@@ -199,6 +199,19 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/RenderMark.qmltypes"
 # 生成 CMake 包配置文件（手动定义 IMPORTED 目标，避免导出 QML 内部资源目标）
 include(CMakePackageConfigHelpers)
 
+# 根据平台设置库文件名变量，供 RenderMarkConfig.cmake.in 模板使用
+if(ANDROID)
+    set(RENDERMARK_CONFIG_CMARK_NAME "cmark-gfm")
+    set(RENDERMARK_CONFIG_CMARK_EXT_NAME "cmark-gfm-extensions")
+    set(RENDERMARK_CONFIG_ABI_SUFFIX "_${ANDROID_ABI}")
+    set(RENDERMARK_CONFIG_PLUGIN_NAME "qml_RenderMark_RenderMarkplugin_${ANDROID_ABI}")
+else()
+    set(RENDERMARK_CONFIG_CMARK_NAME "cmark-gfm")
+    set(RENDERMARK_CONFIG_CMARK_EXT_NAME "cmark-gfm-extensions")
+    set(RENDERMARK_CONFIG_ABI_SUFFIX "")
+    set(RENDERMARK_CONFIG_PLUGIN_NAME "RenderMarkplugin")
+endif()
+
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/RenderMarkConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/RenderMarkConfig.cmake"
