@@ -52,9 +52,8 @@ Item {
         }
 
         onClicked: {
-            if (root.astNode && root.astNode.url) {
-                Qt.openUrlExternally(root.astNode.url);
-            }
+            if (root.astNode && root.astNode.url && root.renderMark)
+                root.renderMark.openLink(root.astNode.url)
         }
     }
 }

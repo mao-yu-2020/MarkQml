@@ -24,7 +24,9 @@ Text {
         when: root.astNode !== null
     }
 
-    textFormat: Text.StyledText
+    textFormat: Text.PlainText
+    wrapMode: Text.Wrap
+    width: parent ? parent.width : implicitWidth
 
     Binding on color {
         value: root.astStyle.htmlBlockStyle.color

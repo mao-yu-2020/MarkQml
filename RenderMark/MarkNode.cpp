@@ -31,11 +31,14 @@ QString MarkNode::content() const
  */
 QVariantList MarkNode::children() const
 {
-    QVariantList result;
-    for (MarkNode *child : _children) {
-        result.append(QVariant::fromValue(child));
+    if (_childrenCacheDirty) {
+        _childrenCache.clear();
+        _childrenCache.reserve(_children.size());
+        for (MarkNode *child : _children)
+            _childrenCache.append(QVariant::fromValue(child));
+        _childrenCacheDirty = false;
     }
-    return result;
+    return _childrenCache;
 }
 
 int MarkNode::level() const
@@ -66,6 +69,11 @@ bool MarkNode::ordered() const
 int MarkNode::start() const
 {
     return _start;
+}
+
+bool MarkNode::isTasklist() const
+{
+    return _type == "tasklist";
 }
 
 bool MarkNode::tasklistChecked() const
@@ -131,12 +139,24 @@ QString MarkNode::plainText() const
     if (_type == "text" || _type == "code" || _type == "code_block")
         return _content;
 
-    QString result;
-    for (MarkNode *child : _children) {
-        if (child)
-            result += child->plainText();
+    if (_plainTextCacheDirty) {
+        QString result;
+        for (MarkNode *child : _children) {
+            if (child)
+                result += child->plainText();
+        }
+        _plainTextCache = result;
+        _plainTextCacheDirty = false;
     }
-    return result;
+    return _plainTextCache;
+}
+
+void MarkNode::invalidateCaches()
+{
+    _childrenCacheDirty = true;
+    _plainTextCacheDirty = true;
+    _childrenCache.clear();
+    _plainTextCache.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -145,16 +165,25 @@ QString MarkNode::plainText() const
 
 void MarkNode::setType(const QString &type)
 {
+    if (_type == type)
+        return;
     _type = type;
+    _plainTextCacheDirty = true;
+    _plainTextCache.clear();
 }
 
 void MarkNode::setContent(const QString &content)
 {
+    if (_content == content)
+        return;
     _content = content;
+    _plainTextCacheDirty = true;
+    _plainTextCache.clear();
 }
 
 void MarkNode::appendChild(MarkNode *child)
 {
+    invalidateCaches();
     if (child) {
         // 将子节点的 QObject parent 设为当前节点，
         // 这样当当前节点被销毁时，子节点会自动释放
@@ -165,6 +194,7 @@ void MarkNode::appendChild(MarkNode *child)
 
 void MarkNode::insertChild(int index, MarkNode *child)
 {
+    invalidateCaches();
     if (!child)
         return;
 
@@ -179,6 +209,7 @@ void MarkNode::insertChild(int index, MarkNode *child)
 
 void MarkNode::removeChild(int index)
 {
+    invalidateCaches();
     if (index < 0 || index >= _children.size())
         return;
 
@@ -190,6 +221,7 @@ void MarkNode::removeChild(int index)
 
 void MarkNode::removeChild(MarkNode *child)
 {
+    invalidateCaches();
     if (!child)
         return;
 
@@ -202,6 +234,7 @@ void MarkNode::removeChild(MarkNode *child)
 
 void MarkNode::clearChildren()
 {
+    invalidateCaches();
     // takeFirst + delete 确保逐个释放，避免迭代器失效
     while (!_children.isEmpty()) {
         MarkNode *child = _children.takeFirst();

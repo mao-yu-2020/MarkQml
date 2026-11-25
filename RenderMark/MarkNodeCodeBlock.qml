@@ -1,95 +1,138 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 
 /**
- * @brief 代码块（code_block）渲染组件
+ * @brief Fenced code block renderer.
  *
- * 带背景色的块级代码区域，支持显示语言标识。
- * 四周保留 padding 内边距，语言标签以 pill 样式呈现。
+ * The block is width-constrained so it cannot push the chat column sideways.
+ * Code wraps by default; callers can set wrapCode to false to get a horizontal
+ * scroller. The copy action selects the whole code body before copying, so it
+ * does not depend on a previous manual selection.
  */
 Rectangle {
     id: root
 
     property var astNode: null
     property var renderMark: null
+    property bool wrapCode: renderMark ? renderMark.codeWrap : true
+
     readonly property var astStyle: renderMark ? renderMark.style : null
+    readonly property string code: root.astNode ? root.astNode.content : ""
+    readonly property string language: root.astNode ? root.astNode.language : ""
 
     function init(node, rm) {
-        astNode = node;
-        renderMark = rm;
+        astNode = node
+        renderMark = rm
     }
 
-    Binding on color {
-        value: root.astStyle.codeBlockStyle.background
-        when: root.astStyle !== null
-    }
-    Binding on radius {
-        value: root.astStyle ? root.astStyle.codeBlockStyle.radius : 4
-        when: root.astStyle !== null
+    function copyAll() {
+        codeEdit.selectAll()
+        codeEdit.copy()
+        codeEdit.deselect()
     }
 
-    Binding on width {
-        value: contentColumn.implicitWidth + root.astStyle.codeBlockStyle.padding * 2
-        when: root.astStyle !== null
-    }
-    Binding on height {
-        value: contentColumn.implicitHeight + root.astStyle.codeBlockStyle.padding * 2
-        when: root.astStyle !== null
-    }
+    width: parent ? parent.width : implicitWidth
+    implicitHeight: contentColumn.implicitHeight + (root.astStyle ? root.astStyle.codeBlockStyle.padding * 2 : 24)
+    height: implicitHeight
+    color: root.astStyle ? root.astStyle.codeBlockStyle.background : "#f8fafc"
+    radius: root.astStyle ? root.astStyle.codeBlockStyle.radius : 4
 
     Column {
         id: contentColumn
         x: root.astStyle ? root.astStyle.codeBlockStyle.padding : 12
         y: root.astStyle ? root.astStyle.codeBlockStyle.padding : 12
-        spacing: 8
+        width: Math.max(0, root.width - x * 2)
+        spacing: 6
 
-        // 语言标签 pill
-        Rectangle {
-            visible: root.astNode ? root.astNode.language !== "" : false
-            width: langLabel.implicitWidth + 16
-            height: langLabel.implicitHeight + 8
-            radius: 4
+        RowLayout {
+            width: parent.width
+            spacing: 8
 
-            Binding on color {
-                value: root.astStyle.codeBlockStyle.langLabelBackground
-                when: root.astStyle !== null
+            Rectangle {
+                visible: root.language !== ""
+                implicitWidth: langLabel.implicitWidth + 16
+                implicitHeight: langLabel.implicitHeight + 8
+                radius: 4
+                color: root.astStyle ? root.astStyle.codeBlockStyle.langLabelBackground : Qt.rgba(0, 0, 0, 0.05)
+
+                Text {
+                    id: langLabel
+                    anchors.centerIn: parent
+                    text: root.language
+                    color: root.astStyle ? root.astStyle.codeBlockStyle.langLabelColor : "#1a1a2e"
+                    font.pixelSize: root.astStyle ? root.astStyle.codeBlockStyle.fontSize * 0.8 : 11
+                    font.family: "monospace"
+                }
             }
 
-            Text {
-                id: langLabel
-                anchors.centerIn: parent
-                Binding on text {
-                    value: root.astNode ? root.astNode.language : ""
-                    when: root.astNode !== null
+            Item {
+                Layout.fillWidth: true
+            }
+
+            Rectangle {
+                id: copyButton
+                implicitWidth: copyLabel.implicitWidth + 16
+                implicitHeight: copyLabel.implicitHeight + 8
+                radius: 4
+                color: copyMouse.containsMouse
+                    ? Qt.rgba(0.5, 0.5, 0.5, 0.18)
+                    : Qt.rgba(0.5, 0.5, 0.5, 0.08)
+
+                Text {
+                    id: copyLabel
+                    anchors.centerIn: parent
+                    text: "复制"
+                    color: root.astStyle ? root.astStyle.codeBlockStyle.langLabelColor : "#1a1a2e"
+                    font.pixelSize: root.astStyle ? root.astStyle.codeBlockStyle.fontSize * 0.8 : 11
                 }
-                Binding on color {
-                    value: root.astStyle.codeBlockStyle.langLabelColor
-                    when: root.astStyle !== null
+
+                MouseArea {
+                    id: copyMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.copyAll()
                 }
-                Binding on font.pixelSize {
-                    value: root.astStyle.codeBlockStyle.fontSize * 0.8
-                    when: root.astStyle !== null
-                }
-                font.family: "Consolas, Courier New, monospace"
             }
         }
 
-        Text {
-            Binding on text {
-                value: root.astNode ? root.astNode.content : ""
-                when: root.astNode !== null
+        TextMetrics {
+            id: codeMetrics
+            font: codeEdit.font
+            text: root.wrapCode ? "" : root.code
+        }
+
+        Flickable {
+            id: codeFlick
+            width: parent.width
+            height: codeEdit.contentHeight
+            contentWidth: root.wrapCode ? width : Math.max(width, codeMetrics.advanceWidth + 2)
+            contentHeight: height
+            clip: true
+            flickableDirection: Flickable.HorizontalFlick
+
+            TextEdit {
+                id: codeEdit
+                width: root.wrapCode ? codeFlick.width : Math.max(codeFlick.width, codeMetrics.advanceWidth + 2)
+                text: root.code
+                height: contentHeight
+                readOnly: true
+                selectByMouse: true
+                persistentSelection: true
+                textFormat: TextEdit.PlainText
+                wrapMode: root.wrapCode ? TextEdit.WrapAnywhere : TextEdit.NoWrap
+                textMargin: 0
+                padding: 0
+                leftPadding: 0
+                rightPadding: 0
+                topPadding: 0
+                bottomPadding: 0
+                color: root.astStyle ? root.astStyle.codeBlockStyle.color : "#1a1a2e"
+                font.pixelSize: root.astStyle ? root.astStyle.codeBlockStyle.fontSize : 14
+                font.family: "monospace"
             }
-            Binding on color {
-                value: root.astStyle.codeBlockStyle.color
-                when: root.astStyle !== null
-            }
-            Binding on font.pixelSize {
-                value: root.astStyle.codeBlockStyle.fontSize
-                when: root.astStyle !== null
-            }
-            font.family: "Consolas, Courier New, monospace"
-            wrapMode: Text.Wrap
         }
     }
 }

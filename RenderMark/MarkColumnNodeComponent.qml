@@ -18,11 +18,14 @@ Column {
         renderMark = rm;
     }
 
+    width: parent ? parent.width : implicitWidth
+
     Repeater {
         model: root.astNode ? root.astNode.children : []
 
         MarkNodeComponent {
             required property var modelData
+            width: root.width
             astNode: modelData
             renderMark: root.renderMark
         }

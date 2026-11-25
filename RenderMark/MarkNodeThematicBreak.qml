@@ -28,5 +28,5 @@ Rectangle {
         when: root.astStyle !== null
     }
 
-    width: parent && parent.parent ? parent.parent.width : 0
+    width: parent ? parent.width : 0
 }

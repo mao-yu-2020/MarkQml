@@ -3,10 +3,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 
 /**
- * @brief 列表项（item）渲染组件
+ * @brief List item renderer (normal bullet/number and GFM task items).
  *
- * 左侧显示无序列表的 bullet（•）或有序列表的序号（1. 2. ...），
- * 右侧通过 MarkColumnNodeComponent 递归渲染子节点（paragraph、嵌套 list 等）。
+ * cmark-gfm exposes task items as a "tasklist" node with a checked flag.
+ * Earlier builds only handled "item", so task items fell through to the
+ * unknown-node renderer. Render both node types here and show a native
+ * checkbox for task items.
  */
 Row {
     id: root
@@ -16,55 +18,85 @@ Row {
     readonly property var cache: renderMark ? renderMark.compCache : null
     property var renderMark: null
 
+    readonly property bool isTasklist: astNode ? astNode.isTasklist : false
+    readonly property bool isChecked: astNode ? astNode.tasklistChecked : false
+
     function init(node, rm) {
-        astNode = node;
-        renderMark = rm;
+        astNode = node
+        renderMark = rm
     }
 
     spacing: root.astStyle ? root.astStyle.itemStyle.bulletRightMargin : 8
+    width: parent ? parent.width : implicitWidth
 
-    // 计算当前 item 在父 list 中的索引，用于有序列表序号
+    // Compute the item index within the parent list for ordered markers.
     property int _itemIndex: {
-        if (!root.astNode) return 0;
-        let listNode = root.astNode.parentNode;
+        if (!root.astNode)
+            return 0
+        let listNode = root.astNode.parentNode
         if (!listNode || !listNode.isList())
-            return 0;
+            return 0
         for (let i = 0; i < listNode.children.length; ++i) {
             if (listNode.children[i] === root.astNode)
-                return i;
+                return i
         }
-        return 0;
+        return 0
     }
 
-    // 左侧标记（bullet 或 number）
-    Text {
+    // Marker: checkbox for task items, bullet/number otherwise.
+    Item {
         id: marker
-        Binding on text {
-            value: {
-                if (!root.astNode) return "•";
-                let listNode = root.astNode.parentNode;
+        width: root.isTasklist
+            ? 16
+            : markerText.implicitWidth
+        height: Math.max(root.isTasklist ? 16 : markerText.implicitHeight,
+                         contentColumn.height)
+
+        Text {
+            id: markerText
+            visible: !root.isTasklist
+            text: {
+                if (!root.astNode)
+                    return "•"
+                let listNode = root.astNode.parentNode
                 if (!listNode || !listNode.isList())
-                    return "•";
-                if (listNode.ordered) {
-                    let num = root._itemIndex + listNode.start;
-                    return num + ".";
-                }
-                return "•";
+                    return "•"
+                if (listNode.ordered)
+                    return (root._itemIndex + listNode.start) + "."
+                return "•"
             }
-            when: root.astNode !== null
+            color: root.astStyle ? root.astStyle.itemStyle.color : "#1a1a2e"
+            font.pixelSize: root.astStyle ? root.astStyle.itemStyle.fontSize : 14
+            y: root.isTasklist ? 0 : 0
         }
-        Binding on color {
-            value: root.astStyle.itemStyle.color
-            when: root.astStyle !== null
-        }
-        Binding on font.pixelSize {
-            value: root.astStyle.itemStyle.fontSize
-            when: root.astStyle !== null
+
+        Rectangle {
+            id: checkbox
+            visible: root.isTasklist
+            width: 16
+            height: 16
+            radius: 3
+            color: root.isChecked
+                ? (root.astStyle ? root.astStyle.linkStyle.color : "#2563eb")
+                : "transparent"
+            border.width: 1
+            border.color: root.astStyle ? root.astStyle.itemStyle.color : "#1a1a2e"
+
+            Text {
+                anchors.centerIn: parent
+                text: "✓"
+                visible: root.isChecked
+                color: "white"
+                font.pixelSize: 12
+                font.bold: true
+            }
         }
     }
 
-    // 右侧内容
+    // Right-hand content: paragraphs, nested lists, etc.
     MarkColumnNodeComponent {
+        id: contentColumn
+        width: Math.max(0, root.width - marker.width - root.spacing)
         astNode: root.astNode
         renderMark: root.renderMark
     }

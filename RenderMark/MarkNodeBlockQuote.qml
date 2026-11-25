@@ -29,14 +29,8 @@ Rectangle {
         when: root.astStyle !== null
     }
 
-    Binding on width {
-        value: leftBar.width + contentColumn.implicitWidth + root.astStyle.blockQuoteStyle.leftPadding
-        when: root.astStyle !== null
-    }
-    Binding on height {
-        value: contentColumn.implicitHeight
-        when: root.astStyle !== null
-    }
+    width: parent ? parent.width : implicitWidth
+    height: contentColumn.height
 
     // 左侧竖线
     Rectangle {
@@ -59,6 +53,7 @@ Rectangle {
         anchors.left: leftBar.right
         anchors.top: parent.top
         anchors.leftMargin: root.astStyle ? root.astStyle.blockQuoteStyle.leftPadding : 12
+        width: Math.max(0, root.width - leftBar.width - (root.astStyle ? root.astStyle.blockQuoteStyle.leftPadding : 12))
         astNode: root.astNode
         renderMark: root.renderMark
     }

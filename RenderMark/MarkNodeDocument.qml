@@ -1,7 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import QtQuick
-
 /**
  * @brief 文档根节点（document）渲染组件
  *

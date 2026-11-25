@@ -4,54 +4,52 @@ import QtQuick
 import QtQuick.Layouts
 
 /**
- * @brief 表格单元格（table_cell）渲染组件
+ * @brief Table cell renderer.
  *
- * 带边框的矩形区域，内部通过 MarkRowNodeComponent 渲染行内内容。
- * 在 GridLayout 中使用，Layout.fillWidth 保证列宽对齐。
+ * Cell text goes through the same inline rich-text flow as paragraphs so long
+ * cells wrap and inline formatting works. Column alignment is supplied by
+ * MarkNodeTable from the AST's GFM alignment data.
  */
 Rectangle {
     id: root
 
     property var astNode: null
     property var renderMark: null
-    readonly property var astStyle: renderMark ? renderMark.style : null
-    readonly property var cache: renderMark ? renderMark.compCache : null
     property bool isHeaderRow: false
+    property int alignment: 0
+
+    readonly property var astStyle: renderMark ? renderMark.style : null
 
     function init(node, rm) {
-        astNode = node;
-        renderMark = rm;
+        astNode = node
+        renderMark = rm
     }
 
     Layout.fillWidth: true
     Layout.fillHeight: true
-    Binding on implicitWidth {
-        value: cellContent.implicitWidth + root.astStyle.tableStyle.cellPadding * 2
-        when: root.astStyle !== null
-    }
-    Binding on implicitHeight {
-        value: cellContent.implicitHeight + root.astStyle.tableStyle.cellPadding * 2
-        when: root.astStyle !== null
-    }
 
-    Binding on color {
-        value: root.isHeaderRow ? root.astStyle.tableStyle.headerBg : root.astStyle.tableStyle.cellBg
-        when: root.astStyle !== null
-    }
-    Binding on border.color {
-        value: root.astStyle.tableStyle.borderColor
-        when: root.astStyle !== null
-    }
-    Binding on border.width {
-        value: root.astStyle ? root.astStyle.tableStyle.borderWidth : 1
-        when: root.astStyle !== null
-    }
+    implicitWidth: Math.max(0, cellText.implicitWidth)
+        + (root.astStyle ? root.astStyle.tableStyle.cellPadding * 2 : 16)
+    implicitHeight: cellText.height
+        + (root.astStyle ? root.astStyle.tableStyle.cellPadding * 2 : 16)
 
-    MarkRowNodeComponent {
-        id: cellContent
+    color: root.isHeaderRow
+        ? (root.astStyle ? root.astStyle.tableStyle.headerBg : "transparent")
+        : (root.astStyle ? root.astStyle.tableStyle.cellBg : "transparent")
+    border.color: root.astStyle ? root.astStyle.tableStyle.borderColor : "#e2e8f0"
+    border.width: root.astStyle ? root.astStyle.tableStyle.borderWidth : 1
+
+    MarkInlineText {
+        id: cellText
         x: root.astStyle ? root.astStyle.tableStyle.cellPadding : 8
         y: root.astStyle ? root.astStyle.tableStyle.cellPadding : 8
+        width: Math.max(0, root.width - x * 2)
         astNode: root.astNode
         renderMark: root.renderMark
+        isTableCell: true
+        isHeaderCell: root.isHeaderRow
+        horizontalAlignment: root.alignment === 1
+            ? Text.AlignHCenter
+            : (root.alignment === 2 ? Text.AlignRight : Text.AlignLeft)
     }
 }

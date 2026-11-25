@@ -13,6 +13,8 @@ A native **Qt 6 + QML** Markdown renderer powered by `cmark-gfm`. It parses Mark
 - Qt 6.8+
 - CMake 3.16+
 - cmark-gfm (with extensions) — **managed via vcpkg**
+- JKQTMathText (optional) — enable block-formula rendering with `-DJKQTMATH_TEXT_ROOT=/path/to/prefix`
+- CJK-friendly cmark-gfm fork (optional) — enable CJK emphasis parsing with `-DCMARK_GFM_CJK_ROOT=/path/to/prefix`
 
 ### 2. Get the Source and Build
 
@@ -217,6 +219,7 @@ PATH=D:/temp/bin;%PATH%
 - 🎨 **Four Built-in Themes** — Light / Dark / Cold / Warm, one-click switching with binding-driven live updates
 - 📐 **AST-Driven Componentized Architecture** — Each Markdown node maps to an independent QML component, easy to extend
 - 🔗 **GFM Extension Support** — Tables, strikethrough, task lists, autolinks, and more
+- 🧮 **Block Math (Optional)** — Renders `$$...$$` and `\[...\]` through JKQTMathText, with a plain-text fallback when the library is unavailable
 - ⚡ **Component Cache Optimization** — Pre-caches QML `Component` objects to avoid repeated QML file parsing
 - 🛡️ **No Initialization Conflicts** — Eliminates `required property` issues; safely passes AST nodes via `init()` + conditional `Binding`
 

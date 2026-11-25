@@ -52,6 +52,9 @@ class RENDERMARK_EXPORT MarkNode : public QObject
     /** @brief 有序列表起始序号，仅 list 节点有效 */
     Q_PROPERTY(int start READ start CONSTANT)
 
+    /** @brief 是否为 GFM 任务列表项（type == "tasklist"） */
+    Q_PROPERTY(bool isTasklist READ isTasklist CONSTANT)
+
     /** @brief 任务列表项是否勾选，仅 item 节点且为任务列表时有效 */
     Q_PROPERTY(bool tasklistChecked READ tasklistChecked CONSTANT)
 
@@ -88,6 +91,7 @@ public:
     QString title() const;
     bool ordered() const;
     int start() const;
+    bool isTasklist() const;
     bool tasklistChecked() const;
     int columns() const;
     QVariantList alignments() const;
@@ -219,4 +223,11 @@ private:
     int _columns = 0;             /**< 表格列数 */
     QVariantList _alignments;     /**< 表格列对齐方式 */
     bool _isHeader = false;       /**< 表格行是否为表头 */
+
+    mutable QVariantList _childrenCache; /**< cached QVariantList for QML */
+    mutable bool _childrenCacheDirty = true;
+    mutable QString _plainTextCache;     /**< cached recursive plain text */
+    mutable bool _plainTextCacheDirty = true;
+
+    void invalidateCaches();
 };

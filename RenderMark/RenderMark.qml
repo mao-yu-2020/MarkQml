@@ -25,6 +25,42 @@ Flickable {
     /** @brief 本地文件路径或 file:/// URL，设置后自动加载并渲染 */
     property string source: ""
 
+    /**
+     * @brief 让根容器的高度跟随内容高度。
+     *
+     * Chat lists must own the vertical scrolling; a nested Flickable with a
+     * fixed viewport would otherwise swallow wheel/touch gestures. Setting
+     * fitContent to true (together with interactive: false) turns this
+     * component into a content-sized view suitable for a ListView delegate.
+     */
+    property bool fitContent: false
+
+    /** @brief Wrap long lines inside fenced code blocks (default true). */
+    property bool codeWrap: true
+
+    /**
+     * @brief Fade blocks in as they are created.
+     *
+     * Disable for live-token streaming where the opacity animation would make
+     * newly arrived text look delayed.
+     */
+    property bool animate: true
+
+    /**
+     * @brief Minimum interval between re-parses while markdown is streaming.
+     *
+     * 0 keeps the historical immediate behaviour. Chat clients can set e.g.
+     * 50 to coalesce token updates instead of rebuilding the AST for every
+     * character.
+     */
+    property int parseDelay: 0
+    property bool _parsePending: false
+    property bool _loadingSource: false
+
+    implicitHeight: contentHeight
+    height: fitContent ? contentHeight : implicitHeight
+    interactive: !fitContent
+
     /** @brief 源文件所在目录的 URL，用于解析图片等相对路径 */
     property url baseUrl: ""
 
@@ -95,8 +131,8 @@ Flickable {
             property real  maxWidth: -1
             property real  maxHeight: -1
             property real  radius: 0
-            property color placeholderBg: markStyle.codeStyle.background
-            property color placeholderBorderColor: markStyle.tableStyle.borderColor
+            property color placeholderBg: "#f1f5f9"
+            property color placeholderBorderColor: "#e2e8f0"
             property color placeholderTextColor: markStyle.textColor
             property int   placeholderFontSize: markStyle.baseFontSize
         }
@@ -314,7 +350,7 @@ Flickable {
         // 内置默认组件实现
         Component { id: _defaultText;               MarkNodeText {} }
         Component { id: _defaultLink;               MarkNodeLink {} }
-        Component { id: _defaultParagraph;          MarkRowNodeComponent {} }
+        Component { id: _defaultParagraph;          MarkNodeParagraph {} }
         Component { id: _defaultHeading;            MarkNodeHeading {} }
         Component { id: _defaultList;               MarkColumnNodeComponent {} }
         Component { id: _defaultItem;               MarkNodeItem {} }
@@ -511,10 +547,48 @@ Flickable {
         id: _mark
     }
 
+    // Coalesce streaming updates when requested; parseDelay 0 stays immediate.
+    Timer {
+        id: parseTimer
+        interval: Math.max(1, root.parseDelay)
+        repeat: true
+        running: root.parseDelay > 0 && root._parsePending
+        onTriggered: {
+            if (!root._parsePending)
+                return
+            root._parsePending = false
+            root.tree = _mark.parse(root.markdown)
+        }
+    }
+
+    // If throttling is turned off while a parse is pending, flush it now so
+    // changing the property cannot strand the previous tree indefinitely.
+    onParseDelayChanged: {
+        if (parseDelay === 0 && _parsePending && markdown !== "") {
+            _parsePending = false
+            tree = _mark.parse(markdown)
+        }
+    }
+
     // 当 markdown 文本变化时自动解析
     onMarkdownChanged: {
-        if (markdown !== "") {
-            source = ""
+        if (markdown === "") {
+            // Clearing the document must not leave the previous tree
+            // visible. Source loading clears markdown only as a first step;
+            // it assigns the parsed file tree immediately afterwards, so do
+            // not treat that internal clear as a user document reset.
+            _parsePending = false
+            if (!_loadingSource) {
+                source = ""
+                tree = null
+            }
+            return
+        }
+        source = ""
+        if (parseDelay > 0) {
+            _parsePending = true
+        } else {
+            _parsePending = false
             tree = _mark.parse(markdown)
         }
     }
@@ -522,10 +596,17 @@ Flickable {
     // 当 source 路径变化时自动加载
     onSourceChanged: {
         if (source !== "") {
+            _loadingSource = true
             markdown = ""
+            _loadingSource = false
+            _parsePending = false
             var path = source
             if (path.indexOf("file:///") === 0) {
-                path = decodeURIComponent(path.substring(8))
+                try {
+                    path = decodeURIComponent(path.substring(7))
+                } catch (error) {
+                    path = path.substring(7)
+                }
             }
             tree = _mark.parseFile(path)
         }
@@ -553,6 +634,50 @@ Flickable {
         contentY = Math.max(0, pos.y - 20);
     }
 
+    /**
+     * @brief Only allow schemes that are safe to hand to the desktop opener.
+     *
+     * The reference renderer (markdown-it) rejects javascript:, vbscript:,
+     * file: and most data: links. The chat surface is stricter and only opens
+     * web/mail links; Markdown that fails this test stays as plain text.
+     */
+    function isSafeUrl(url) {
+        if (url === undefined || url === null)
+            return false
+        var value = String(url).trim()
+        if (!value || /[\u0000-\u001f]/.test(value))
+            return false
+        return /^(https?:\/\/|mailto:)/i.test(value)
+    }
+
+    function openLink(url) {
+        if (isSafeUrl(url))
+            Qt.openUrlExternally(String(url).trim())
+    }
+
+    /**
+     * @brief Only allow image schemes that cannot execute code.
+     *
+     * Remote and local images are intentional, but arbitrary URL schemes must
+     * not be handed to the QML image loader. Relative paths remain valid and
+     * are resolved against baseUrl by the image components.
+     */
+    function isSafeImageUrl(url) {
+        if (url === undefined || url === null)
+            return false
+        var value = String(url).trim()
+        if (!value || /[\u0000-\u001f]/.test(value))
+            return false
+        var match = value.match(/^([a-z][a-z0-9+.-]*):/i)
+        if (!match)
+            return true
+        var scheme = match[1].toLowerCase()
+        if (scheme === "http" || scheme === "https"
+                || scheme === "file" || scheme === "qrc")
+            return true
+        return scheme === "data" && /^data:image\//i.test(value)
+    }
+
 
 
     // Flickable 内容区域
@@ -564,12 +689,12 @@ Flickable {
         id: contentRectangle
 
         color: root.bgColor
-        width: contentColumn.width
+        width: root.width
         height: contentColumn.height
 
         Column {
             id: contentColumn
-            width: childrenRect.width
+            width: root.width
             height: childrenRect.height
             spacing: 8
 
@@ -577,19 +702,25 @@ Flickable {
                 model: root.tree && root.tree.root ? tree.root.children : []
 
                 delegate: MarkNodeComponent {
+                    id: markDelegate
                     required property var modelData
                     required property int index
 
+                    width: root.width
                     astNode: modelData
                     renderMark: root
 
-                    opacity: 0
+                    opacity: root.animate ? 0 : 1
 
-                    Component.onCompleted: opacity = 1
+                    Component.onCompleted: {
+                        if (root.animate)
+                            opacity = 1
+                    }
 
                     Behavior on opacity {
+                        enabled: root.animate
                         SequentialAnimation {
-                            PauseAnimation { duration: Math.min(index * 40, 600) }
+                            PauseAnimation { duration: Math.min(markDelegate.index * 40, 600) }
                             NumberAnimation {
                                 duration: 250
                                 easing.type: Easing.OutQuad
@@ -601,6 +732,6 @@ Flickable {
         }
     }
 
-    ScrollBar.vertical: ScrollBar {}
-    ScrollBar.horizontal: ScrollBar {}
+    ScrollBar.vertical: ScrollBar { visible: root.interactive }
+    ScrollBar.horizontal: ScrollBar { visible: root.interactive }
 }

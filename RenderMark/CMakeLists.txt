@@ -37,6 +37,8 @@ set(RENDERMARK_QML_FILES
     MarkNodeBlockQuote.qml
     MarkNodeThematicBreak.qml
     MarkNodeDocument.qml
+    MarkNodeParagraph.qml
+    MarkInlineText.qml
     MarkNodeHtmlBlock.qml
     MarkNodeFootnoteDefinition.qml
     MarkNodeSoftbreak.qml
@@ -44,18 +46,21 @@ set(RENDERMARK_QML_FILES
     MarkNodeHtmlInline.qml
     MarkNodeFootnoteReference.qml
     MarkNodeUnknown.qml
+    MarkNodeMathBlock.qml
 )
 
 set(RENDERMARK_HEADERS
     Mark.h
     MarkNode.h
     MarkTree.h
+    MathTextItem.h
 )
 
 set(RENDERMARK_SOURCES
     Mark.cpp
     MarkNode.cpp
     MarkTree.cpp
+    MathTextItem.cpp
 )
 
 qt_add_qml_module(RenderMark
@@ -82,6 +87,11 @@ target_link_libraries(RenderMark
         Qt6::Quick
         ${CMARK_LIBS}
 )
+
+if(RENDERMARK_ENABLE_MATH_TEXT)
+    target_link_libraries(RenderMark PUBLIC JKQTPlotter::JKQTMathText)
+    target_compile_definitions(RenderMark PUBLIC RENDERMARK_ENABLE_MATH_TEXT)
+endif()
 
 target_include_directories(RenderMark
     PUBLIC
@@ -130,8 +140,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rendermark_export.h"
 
 # 安装 cmark-gfm 依赖库（一起打包，使用者无需自行安装）
 # vcpkg 默认安装动态库：lib/ 下是 implib，bin/ 下是 DLL
+set(RENDERMARK_CONFIG_CMARK_SHARED FALSE)
 set(CMARK_VCPKG_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}")
-if(NOT EXISTS "${CMARK_VCPKG_DIR}")
+if(WIN32 AND NOT EXISTS "${CMARK_VCPKG_DIR}")
     # 回退：尝试从目标属性推导
     get_target_property(CMARK_GFM_IMPLIB libcmark-gfm IMPORTED_IMPLIB_RELEASE)
     get_target_property(CMARK_GFM_DLL libcmark-gfm IMPORTED_LOCATION_RELEASE)
@@ -139,7 +150,28 @@ if(NOT EXISTS "${CMARK_VCPKG_DIR}")
     get_filename_component(CMARK_VCPKG_DIR "${CMARK_VCPKG_DIR}" DIRECTORY)
 endif()
 
-if(ANDROID)
+if(CMARK_GFM_CJK_ROOT AND NOT WIN32)
+    # The CJK fork can be installed as either shared or static libraries. Copy
+    # every matching file (including versioned SONAME symlinks) and generate a
+    # package config that imports the same kind of library.
+    get_filename_component(CMARK_GFM_CJK_LIB_DIR
+        "${CMARK_GFM_CJK_LIBRARY}" DIRECTORY)
+    if(CMARK_GFM_CJK_LIBRARY MATCHES "\\.(so|dylib)(\\..*)?$")
+        set(RENDERMARK_CONFIG_CMARK_SHARED TRUE)
+        file(GLOB CMARK_GFM_CJK_LIBS
+            "${CMARK_GFM_CJK_LIB_DIR}/libcmark-gfm.so*"
+            "${CMARK_GFM_CJK_LIB_DIR}/libcmark-gfm-extensions.so*"
+            "${CMARK_GFM_CJK_LIB_DIR}/libcmark-gfm*.dylib"
+            "${CMARK_GFM_CJK_LIB_DIR}/libcmark-gfm-extensions*.dylib")
+    else()
+        set(CMARK_GFM_CJK_LIBS
+            "${CMARK_GFM_CJK_LIBRARY}"
+            "${CMARK_GFM_CJK_EXT_LIBRARY}")
+    endif()
+    install(FILES ${CMARK_GFM_CJK_LIBS}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+elseif(ANDROID)
     # Android 平台：cmark-gfm 是静态库（.a），通过目标属性获取实际路径
     # 多配置导入目标需要按构建类型取路径，并回退到 RELEASE / DEBUG
     get_target_property(CMARK_GFM_LIB libcmark-gfm_static IMPORTED_LOCATION_${CMAKE_BUILD_TYPE})
@@ -163,7 +195,7 @@ if(ANDROID)
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
     endif()
-elseif(EXISTS "${CMARK_VCPKG_DIR}")
+elseif(WIN32 AND EXISTS "${CMARK_VCPKG_DIR}")
     # Windows 平台：vcpkg 默认安装动态库，lib/ 下是 implib，bin/ 下是 DLL
     install(FILES
         "${CMARK_VCPKG_DIR}/lib/cmark-gfm.lib"
@@ -210,6 +242,12 @@ else()
     set(RENDERMARK_CONFIG_CMARK_EXT_NAME "cmark-gfm-extensions")
     set(RENDERMARK_CONFIG_ABI_SUFFIX "")
     set(RENDERMARK_CONFIG_PLUGIN_NAME "RenderMarkplugin")
+endif()
+
+if(RENDERMARK_ENABLE_MATH_TEXT)
+    set(RENDERMARK_MATH_TEXT_DEP "JKQTPlotter::JKQTMathText")
+else()
+    set(RENDERMARK_MATH_TEXT_DEP "")
 endif()
 
 configure_package_config_file(

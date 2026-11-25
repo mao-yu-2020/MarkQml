@@ -3,6 +3,18 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(Qt6 COMPONENTS Quick)
+if(@RENDERMARK_ENABLE_MATH_TEXT@)
+    if(NOT JKQTMathText6_DIR)
+        find_path(RENDERMARK_JKQT_MATH_TEXT_CONFIG_DIR
+            NAMES JKQTMathText6Config.cmake
+            PATHS "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@/cmake/JKQTPlotter6"
+            NO_DEFAULT_PATH)
+        if(RENDERMARK_JKQT_MATH_TEXT_CONFIG_DIR)
+            set(JKQTMathText6_DIR "${RENDERMARK_JKQT_MATH_TEXT_CONFIG_DIR}")
+        endif()
+    endif()
+    find_dependency(JKQTMathText6)
+endif()
 
 # 创建 bundled cmark-gfm IMPORTED 目标（库随 RenderMark 一起安装，无需外部 vcpkg）
 if(NOT TARGET cmark-gfm)
@@ -11,6 +23,11 @@ if(NOT TARGET cmark-gfm)
         set_target_properties(cmark-gfm PROPERTIES
             IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}cmark-gfm${CMAKE_IMPORT_LIBRARY_SUFFIX}"
             IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}cmark-gfm${CMAKE_SHARED_LIBRARY_SUFFIX}"
+        )
+    elseif(@RENDERMARK_CONFIG_CMARK_SHARED@)
+        add_library(cmark-gfm SHARED IMPORTED)
+        set_target_properties(cmark-gfm PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}@RENDERMARK_CONFIG_CMARK_NAME@${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
     else()
         add_library(cmark-gfm STATIC IMPORTED)
@@ -27,10 +44,17 @@ if(NOT TARGET cmark-gfm-extensions)
             IMPORTED_IMPLIB "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_IMPORT_LIBRARY_SUFFIX}"
             IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/bin/${CMAKE_SHARED_LIBRARY_PREFIX}cmark-gfm-extensions${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
+    elseif(@RENDERMARK_CONFIG_CMARK_SHARED@)
+        add_library(cmark-gfm-extensions SHARED IMPORTED)
+        set_target_properties(cmark-gfm-extensions PROPERTIES
+            IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}@RENDERMARK_CONFIG_CMARK_EXT_NAME@${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            INTERFACE_LINK_LIBRARIES cmark-gfm
+        )
     else()
         add_library(cmark-gfm-extensions STATIC IMPORTED)
         set_target_properties(cmark-gfm-extensions PROPERTIES
             IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}@RENDERMARK_CONFIG_CMARK_EXT_NAME@${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            INTERFACE_LINK_LIBRARIES cmark-gfm
         )
     endif()
 endif()
@@ -65,7 +89,7 @@ if(NOT TARGET RenderMark::RenderMark)
     endif()
     set_target_properties(RenderMark::RenderMark PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/RenderMark"
-        INTERFACE_LINK_LIBRARIES "Qt6::Quick;cmark-gfm;cmark-gfm-extensions"
+        INTERFACE_LINK_LIBRARIES "Qt6::Quick;cmark-gfm;cmark-gfm-extensions;@RENDERMARK_MATH_TEXT_DEP@"
     )
 endif()
 

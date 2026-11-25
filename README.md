@@ -13,6 +13,8 @@
 - Qt 6.8+
 - CMake 3.16+
 - cmark-gfm（含 extensions）— **通过 vcpkg 管理**
+- JKQTMathText（可选）— 通过 `-DJKQTMATH_TEXT_ROOT=/path/to/prefix` 启用块级数学公式渲染
+- CJK 友好的 cmark-gfm 分支（可选）— 通过 `-DCMARK_GFM_CJK_ROOT=/path/to/prefix` 启用中文强调语法
 
 ### 2. 获取源码并构建
 
@@ -217,6 +219,7 @@ PATH=D:/temp/bin;%PATH%
 - 🎨 **四种内置主题** — 亮色 / 暗色 / 冷色 / 暖色，一键切换，绑定驱动实时生效
 - 📐 **AST 驱动组件化架构** — 每个 Markdown 节点对应独立 QML 组件，易于扩展
 - 🔗 **GFM 扩展支持** — 表格、删除线、任务列表、自动链接等
+- 🧮 **块级数学公式（可选）** — 支持 `$$...$$` 与 `\[...\]`，使用 JKQTMathText 原生渲染；未启用时自动回退为公式文本
 - ⚡ **组件缓存优化** — 预缓存 QML `Component` 对象，避免每次重复解析 QML 文件
 - 🛡️ **无初始化冲突** — 取消 `required property`，通过 `init()` + `Binding` 条件绑定安全传递 AST 节点
 
